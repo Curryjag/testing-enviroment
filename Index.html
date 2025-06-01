@@ -84,13 +84,27 @@
       animation: fadeIn 1s ease-in-out infinite alternate;
       padding: 8px 0;
     }
+    
+      @media (min-width: 768px) {
+      .dashboard {
+        height: 400px;
+      }
 
-    @media (min-width: 768px) {
-      .dashboard { height: 400px; }
-      .balance { font-size: 1.5rem; }
-      .amount { font-size: 2.5rem; }
-      .activity-log { font-size: 1rem; max-height: 120px; }
-      .idle-message { font-size: 0.9rem; }
+      .balance {
+        font-size: 1.5rem;
+      }
+
+      .amount {
+        font-size: 2.5rem;
+      }
+
+      .activity-log {
+        font-size: 1rem;
+      }
+
+      .idle-message {
+        font-size: 0.9rem;
+      }                     
     }
   </style>
 </head>
