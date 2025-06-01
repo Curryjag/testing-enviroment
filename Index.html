@@ -122,11 +122,9 @@
   </div>
 
   <script type="module">
-    // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import { getDatabase, ref, onValue, set, runTransaction } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-    // Firebase configuration (using your provided keys)
     const firebaseConfig = {
       apiKey: "AIzaSyAuzAP-nBbSZfLPhHRpUM12Ikx29X8cubc",
       authDomain: "wallet-dashboard-c1f5b.firebaseapp.com",
@@ -138,38 +136,36 @@
       measurementId: "G-LTXHVWPBLR"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
     const walletRef = ref(database, 'walletData');
 
-    // DOM elements
     const balanceDisplay = document.getElementById("balanceDisplay");
     const statusBox = document.getElementById("statusBox");
     const logBox = document.getElementById("logBox");
     const idleMsg = document.getElementById("idleMsg");
 
-    // Initialize with default values if empty
+    // Initialize or load data
     onValue(walletRef, (snapshot) => {
       if (!snapshot.exists()) {
-        initializeWalletData();
+        set(walletRef, {
+          balance: 5000000,
+          logs: []
+        });
       }
     });
 
-    // Listen for real-time updates
-    onValue(walletRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        updateBalanceDisplay(data.balance);
-        renderLogs(data.logs);
-      }
-    });
-
-    function initializeWalletData() {
-      runTransaction(walletRef, () => ({
-        balance: 5000000,
-        logs: []
-      }));
+    // Main function to load and sync data
+    function initializeAppData() {
+      onValue(walletRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          updateBalanceDisplay(data.balance);
+          renderLogs(data.logs);
+        }
+      });
+      
+      randomIntervalCall();
     }
 
     function renderLogs(logs) {
@@ -209,11 +205,14 @@
 
     async function deductBalance(amount) {
       await runTransaction(walletRef, (currentData) => {
-        if (!currentData) return { balance: 5000000, logs: [] };
+        if (!currentData) {
+          return { balance: 5000000, logs: [] };
+        }
         
         currentData.balance -= amount;
         
         if (currentData.balance <= 0) {
+          // EXACTLY replicate your original behavior
           currentData.balance = 5000000;
           currentData.logs = [`${new Date().toLocaleTimeString()} - Balance refilled to $5,000,000`];
         }
@@ -225,13 +224,11 @@
     async function logActivity(message) {
       const timestampedMsg = `${new Date().toLocaleTimeString()} - ${message}`;
       await runTransaction(walletRef, (currentData) => {
-        if (!currentData) return { balance: 5000000, logs: [timestampedMsg] };
-        
-        currentData.logs.unshift(timestampedMsg);
-        if (currentData.logs.length > 50) {
-          currentData.logs = currentData.logs.slice(0, 50);
+        if (!currentData) {
+          return { balance: 5000000, logs: [timestampedMsg] };
         }
         
+        currentData.logs.unshift(timestampedMsg);
         return currentData;
       });
     }
@@ -254,7 +251,7 @@
     }
 
     // Start the app
-    randomIntervalCall();
+    initializeAppData();
   </script>
 </body>
 </html>
