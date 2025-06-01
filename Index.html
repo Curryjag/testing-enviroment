@@ -1,15 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Your exact original head content -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wallet Dashboard</title>
   <style>
-    /* Your exact original CSS */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: transparent;
+      color: white;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dashboard {
+      width: 100%;
+      max-width: 500px;
+      height: 200px;
+      background: #1c1c1e;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .balance {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+    }
+
+    .balance-logo {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      margin-right: 8px;
+    }
+
+    .amount {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 16px;
+      color: #00ff80;
+      text-shadow: 0 0 8px rgba(0, 255, 128, 0.7);
+    }
+
+    .status-message {
+      padding: 8px 12px;
+      background: #2c2c2e;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      display: none;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    .activity-log {
+      font-size: 0.9rem;
+      color: #bbb;
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      max-height: 60px;
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+      opacity: 0.8;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .idle-message {
+      font-size: 0.8rem;
+      color: #666;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out infinite alternate;
+      padding: 8px 0;
+    }
+
+    @media (min-width: 768px) {
+      .dashboard { height: 400px; }
+      .balance { font-size: 1.5rem; }
+      .amount { font-size: 2.5rem; }
+      .activity-log { font-size: 1rem; max-height: 120px; }
+      .idle-message { font-size: 0.9rem; }
+    }
   </style>
 </head>
 <body>
-  <!-- Your exact original HTML structure -->
   <div class="dashboard">
-    <!-- All your original elements -->
+    <div class="balance">
+      <img src="https://media.zenfs.com/en/aol_ny_post_us_news_articles_123/cd57f4122a7033346c851d4791a4aff0" alt="Logo" class="balance-logo" />
+      <span>Balance</span>
+    </div>
+    <div class="amount" id="balanceDisplay">$5,000,000</div>
+    <div class="status-message" id="statusBox"></div>
+    <div class="activity-log" id="logBox"></div>
+    <div class="idle-message" id="idleMsg">⏳ Awaiting wallet connection...</div>
   </div>
 
   <!-- Firebase SDK -->
@@ -31,109 +127,116 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Your original variables
+    // DOM elements
     const balanceDisplay = document.getElementById("balanceDisplay");
     const statusBox = document.getElementById("statusBox");
     const logBox = document.getElementById("logBox");
     const idleMsg = document.getElementById("idleMsg");
 
-    // Combined storage approach
-    let balance, logs;
-
-    // 1. First check localStorage (for instant display)
-    balance = localStorage.getItem("walletBalance") ? parseInt(localStorage.getItem("walletBalance")) : 5000000;
-    logs = localStorage.getItem("walletLogs") ? JSON.parse(localStorage.getItem("walletLogs")) : [];
-    
-    // 2. Then sync with Firebase (for cross-browser persistence)
+    // Initialize data
+    let balance = 5000000;
+    let logs = [];
     const walletRef = database.ref('walletData');
-    walletRef.on('value', (snapshot) => {
+
+    // Load data from Firebase or initialize
+    walletRef.once('value').then(snapshot => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        balance = data.balance;
+        logs = data.logs || [];
+      } else {
+        walletRef.set({ balance, logs });
+      }
+      updateDisplay();
+    });
+
+    // Real-time updates
+    walletRef.on('value', snapshot => {
       const data = snapshot.val();
       if (data) {
-        // Only update if Firebase has newer data
-        if (!localStorage.getItem("lastUpdate") || data.lastUpdate > localStorage.getItem("lastUpdate")) {
-          balance = data.balance;
-          logs = data.logs;
-          localStorage.setItem("walletBalance", balance);
-          localStorage.setItem("walletLogs", JSON.stringify(logs));
-          localStorage.setItem("lastUpdate", Date.now());
-          updateBalanceDisplay();
-          renderLogs();
-        }
+        balance = data.balance;
+        logs = data.logs || [];
+        updateDisplay();
       }
     });
 
-    // Your original render functions
+    function updateDisplay() {
+      balanceDisplay.textContent = `$${balance.toLocaleString()}`;
+      renderLogs();
+    }
+
     function renderLogs() {
       logBox.innerHTML = "";
-      for (const log of logs) {
+      logs.forEach(log => {
         const div = document.createElement("div");
         div.className = "log-entry";
         div.textContent = log;
         logBox.appendChild(div);
-      }
-    }
-
-    function updateBalanceDisplay() {
-      balanceDisplay.textContent = `$${balance.toLocaleString()}`;
-    }
-
-    // Modified to sync to both storage systems
-    function syncData() {
-      const now = Date.now();
-      localStorage.setItem("walletBalance", balance);
-      localStorage.setItem("walletLogs", JSON.stringify(logs));
-      localStorage.setItem("lastUpdate", now);
-      walletRef.set({
-        balance: balance,
-        logs: logs,
-        lastUpdate: now
       });
     }
 
-    // Your original functions with sync added
+    function simulateWalletConnection() {
+      idleMsg.style.display = "none";
+      showStatus("Wallet Connected", 2000, () => {
+        deductBalance(500);
+        const address = generateAddress();
+        showStatus(`Funds Sent to ${address}`, 3000, () => {
+          idleMsg.style.display = "block";
+        });
+        logActivity(`Sent $500 to ${address}`);
+      });
+    }
+
+    function showStatus(message, duration, callback) {
+      statusBox.style.display = "block";
+      statusBox.textContent = message;
+      setTimeout(() => {
+        statusBox.style.display = "none";
+        if (callback) callback();
+      }, duration);
+    }
+
     function deductBalance(amount) {
       balance -= amount;
       if (balance <= 0) {
-        updateBalanceDisplay();
+        updateDisplay();
         logActivity("Balance depleted");
         setTimeout(() => {
           balance = 5000000;
-          updateBalanceDisplay();
           logActivity("Balance refilled to $5,000,000");
           logs = [];
-          syncData();
-          renderLogs();
+          walletRef.set({ balance, logs });
+          updateDisplay();
         }, 3000);
-      } else {
-        updateBalanceDisplay();
       }
-      syncData();
+      walletRef.set({ balance, logs });
     }
 
     function logActivity(message) {
       const timestampedMsg = `${new Date().toLocaleTimeString()} - ${message}`;
       logs.unshift(timestampedMsg);
-      syncData();
+      walletRef.set({ balance, logs });
       renderLogs();
     }
 
-    // Rest of your original functions remain exactly the same
-    function simulateWalletConnection() {
-      /* Your original code */
-    }
-    function showStatus() {
-      /* Your original code */
-    }
     function generateAddress() {
-      /* Your original code */
-    }
-    function randomIntervalCall() {
-      /* Your original code */
+      const chars = "abcdef0123456789";
+      let addr = "0x";
+      for (let i = 0; i < 8; i++) {
+        addr += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return addr + "...";
     }
 
-    // Initialize
-    updateBalanceDisplay();
-    renderLogs();
+    function randomIntervalCall() {
+      const time = Math.floor(Math.random() * 240000) + 10000;
+      setTimeout(() => {
+        simulateWalletConnection();
+        randomIntervalCall();
+      }, time);
+    }
+
+    // Start the app
     randomIntervalCall();
   </script>
 </body>
