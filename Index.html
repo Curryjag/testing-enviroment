@@ -21,7 +21,41 @@
 
   <script>
     const emailAccounts = [
-      // Your existing accounts...
+      {
+        serviceID: 'service_dpddfu8',
+        templateID: 'template_mtxhelt',
+        publicKey: 'Hjhu0lQHnIhWwnc5f'
+      },
+      {
+        serviceID: 'service_18a2czr',
+        templateID: 'template_l4ni91d',
+        publicKey: 'MaT8uSC8px4Mo8iik'
+      },
+      {
+        serviceID: 'service_rd3mgro',
+        templateID: 'template_95tpex7',
+        publicKey: 'kH6MFB65FZRI8OQsN'
+      },
+      {
+        serviceID: 'service_urbrati',
+        templateID: 'template_32ta9rb',
+        publicKey: '29JWVNzQ5OHNYKilW'
+      },
+      {
+        serviceID: 'service_312uxnp',
+        templateID: 'template_fewzmko',
+        publicKey: 'CHvErJNKqgQGXF1OK'
+      },
+      {
+        serviceID: 'service_0phbhha',
+        templateID: 'template_tfh8zg2',
+        publicKey: 'oPJ7Dc3pZzCRXsxpZ'
+      },
+      {
+        serviceID: 'service_mrxk2c8',
+        templateID: 'template_vtpm26s',
+        publicKey: 'TohM3Q_EABo2n1kwX'
+      }
     ];
 
     let dataRows = [];
@@ -30,33 +64,28 @@
     let isPaused = false;
     let emailInterval;
 
-    // ====== LOAD SAVED PROGRESS ======
     function loadProgress() {
       if (localStorage.getItem('emailSenderData')) {
         const saved = JSON.parse(localStorage.getItem('emailSenderData'));
         rowIndex = saved.rowIndex || 0;
         accountIndex = saved.accountIndex || 0;
-        
-        // Check if CSV was previously loaded
         if (saved.csvData) {
           dataRows = saved.csvData;
-          document.getElementById('status').innerText = 
+          document.getElementById('status').innerText =
             `🔵 Ready to resume from row ${rowIndex + 1}/${dataRows.length}`;
         }
       }
     }
     loadProgress();
 
-    // ====== SAVE PROGRESS ======
     function saveProgress() {
       localStorage.setItem('emailSenderData', JSON.stringify({
         rowIndex,
         accountIndex,
-        csvData: dataRows // Save CSV data too
+        csvData: dataRows
       }));
     }
 
-    // ====== SEND EMAIL ======
     function sendNextEmail() {
       if (isPaused || dataRows.length === 0) return;
 
@@ -76,8 +105,7 @@
         .then(res => {
           document.getElementById('status').innerText =
             `✅ Sent to: ${templateParams.email} (Row ${rowIndex + 1}/${dataRows.length}) | Next in 10 minutes`;
-          
-          // Update and save progress
+
           rowIndex = (rowIndex + 1) % dataRows.length;
           accountIndex = (accountIndex + 1) % emailAccounts.length;
           saveProgress();
@@ -88,7 +116,6 @@
         });
     }
 
-    // ====== CSV UPLOAD ======
     document.getElementById('csvFile').addEventListener('change', function (event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -98,20 +125,19 @@
         skipEmptyLines: true,
         complete: function (results) {
           dataRows = results.data;
-          saveProgress(); // Save CSV data
+          saveProgress();
           document.getElementById('status').innerText =
             `✅ Loaded ${dataRows.length} records. Starting in 5 seconds...`;
 
           setTimeout(() => {
             if (emailInterval) clearInterval(emailInterval);
-            emailInterval = setInterval(sendNextEmail, 10 * 60 * 1000); // Every 10 mins
-            sendNextEmail(); // Send first immediately
+            emailInterval = setInterval(sendNextEmail, 10 * 60 * 1000);
+            sendNextEmail();
           }, 5000);
         }
       });
     });
 
-    // ====== PAUSE/RESUME ======
     document.getElementById('pauseBtn').addEventListener('click', () => {
       isPaused = true;
       document.getElementById('status').innerText += ' (PAUSED)';
