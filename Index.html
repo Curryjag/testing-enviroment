@@ -2,92 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>EmailJS CSV Rotator (Refresh-Proof)</title>
+  <title>EmailJS CSV Rotator (Complete Version)</title>
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    input[type="file"] { margin-bottom: 10px; }
-    #status { margin-top: 15px; font-weight: bold; }
-    button { padding: 8px 12px; margin: 5px; }
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+    input[type="file"] { margin-bottom: 10px; display: block; }
+    #status { margin: 15px 0; font-weight: bold; min-height: 60px; padding: 10px; background: #f5f5f5; border-radius: 4px; }
+    button { padding: 8px 12px; margin: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 4px; }
+    button:hover { opacity: 0.9; }
+    button:disabled { background: #cccccc; cursor: not-allowed; }
+    #controls { margin: 15px 0; }
+    .completed { color: #4CAF50; font-weight: bold; }
+    .error { color: #f44336; }
   </style>
 </head>
 <body>
-  <h2>EmailJS Auto Sender (Refresh-Proof)</h2>
+  <h2>EmailJS Auto Sender (Complete Version)</h2>
   <input type="file" id="csvFile" accept=".csv" />
-  <button id="pauseBtn">⏸ Pause</button>
-  <button id="resumeBtn">▶ Resume</button>
-  <p id="status">Upload your CSV to begin...</p>
+  
+  <div id="controls">
+    <button id="startBtn">▶ Start</button>
+    <button id="pauseBtn">⏸ Pause</button>
+    <button id="resumeBtn" disabled>▶ Resume</button>
+    <button id="resetBtn">🔄 Reset/New CSV</button>
+  </div>
+  
+  <div id="status">Upload your CSV file and click Start</div>
 
   <script>
     const emailAccounts = [
-      {
-        serviceID: 'service_dpddfu8',
-        templateID: 'template_mtxhelt',
-        publicKey: 'Hjhu0lQHnIhWwnc5f'
-      },
-      {
-        serviceID: 'service_18a2czr',
-        templateID: 'template_l4ni91d',
-        publicKey: 'MaT8uSC8px4Mo8iik'
-      },
-      {
-        serviceID: 'service_rd3mgro',
-        templateID: 'template_95tpex7',
-        publicKey: 'kH6MFB65FZRI8OQsN'
-      },
-      {
-        serviceID: 'service_urbrati',
-        templateID: 'template_32ta9rb',
-        publicKey: '29JWVNzQ5OHNYKilW'
-      },
-      {
-        serviceID: 'service_312uxnp',
-        templateID: 'template_fewzmko',
-        publicKey: 'CHvErJNKqgQGXF1OK'
-      },
-      {
-        serviceID: 'service_0phbhha',
-        templateID: 'template_tfh8zg2',
-        publicKey: 'oPJ7Dc3pZzCRXsxpZ'
-      },
-      {
-        serviceID: 'service_mrxk2c8',
-        templateID: 'template_vtpm26s',
-        publicKey: 'TohM3Q_EABo2n1kwX'
-      }
+      { serviceID: 'service_dpddfu8', templateID: 'template_mtxhelt', publicKey: 'Hjhu0lQHnIhWwnc5f' },
+      { serviceID: 'service_18a2czr', templateID: 'template_l4ni91d', publicKey: 'MaT8uSC8px4Mo8iik' },
+      { serviceID: 'service_rd3mgro', templateID: 'template_95tpex7', publicKey: 'kH6MFB65FZRI8OQsN' },
+      { serviceID: 'service_urbrati', templateID: 'template_32ta9rb', publicKey: '29JWVNzQ5OHNYKilW' },
+      { serviceID: 'service_312uxnp', templateID: 'template_fewzmko', publicKey: 'CHvErJNKqgQGXF1OK' },
+      { serviceID: 'service_0phbhha', templateID: 'template_tfh8zg2', publicKey: 'oPJ7Dc3pZzCRXsxpZ' },
+      { serviceID: 'service_mrxk2c8', templateID: 'template_vtpm26s', publicKey: 'TohM3Q_EABo2n1kwX' }
     ];
 
     let dataRows = [];
     let rowIndex = 0;
     let accountIndex = 0;
     let isPaused = false;
+    let isRunning = false;
     let emailInterval;
+    let totalSent = 0;
 
+    // ====== INITIAL LOAD ======
     function loadProgress() {
       if (localStorage.getItem('emailSenderData')) {
         const saved = JSON.parse(localStorage.getItem('emailSenderData'));
         rowIndex = saved.rowIndex || 0;
         accountIndex = saved.accountIndex || 0;
+        totalSent = saved.totalSent || 0;
+        
         if (saved.csvData) {
           dataRows = saved.csvData;
-          document.getElementById('status').innerText =
-            `🔵 Ready to resume from row ${rowIndex + 1}/${dataRows.length}`;
+          updateStatus(`🔵 Ready to resume (${totalSent}/${dataRows.length} sent)`);
+          toggleButtons(true);
         }
       }
     }
     loadProgress();
 
+    // ====== SAVE PROGRESS ======
     function saveProgress() {
       localStorage.setItem('emailSenderData', JSON.stringify({
         rowIndex,
         accountIndex,
-        csvData: dataRows
+        csvData: dataRows,
+        totalSent,
+        lastSendTime: Date.now()
       }));
     }
 
+    // ====== STATUS UPDATES ======
+    function updateStatus(message, isComplete = false, isError = false) {
+      const statusEl = document.getElementById('status');
+      statusEl.innerHTML = message;
+      statusEl.className = isComplete ? 'completed' : isError ? 'error' : '';
+    }
+
+    // ====== BUTTON STATES ======
+    function toggleButtons(hasFile = false) {
+      document.getElementById('startBtn').disabled = !hasFile || isRunning;
+      document.getElementById('pauseBtn').disabled = !isRunning;
+      document.getElementById('resumeBtn').disabled = !isPaused || !isRunning;
+    }
+
+    // ====== SEND EMAIL ======
     function sendNextEmail() {
       if (isPaused || dataRows.length === 0) return;
+
+      // Check if all emails have been sent
+      if (totalSent >= dataRows.length) {
+        clearInterval(emailInterval);
+        updateStatus(`🎉 COMPLETED! All ${dataRows.length} emails sent successfully!`, true);
+        isRunning = false;
+        toggleButtons();
+        return;
+      }
 
       const currentAccount = emailAccounts[accountIndex];
       const currentData = dataRows[rowIndex];
@@ -103,19 +118,47 @@
 
       emailjs.send(currentAccount.serviceID, currentAccount.templateID, templateParams)
         .then(res => {
-          document.getElementById('status').innerText =
-            `✅ Sent to: ${templateParams.email} (Row ${rowIndex + 1}/${dataRows.length}) | Next in 10 minutes`;
-
+          totalSent++;
           rowIndex = (rowIndex + 1) % dataRows.length;
           accountIndex = (accountIndex + 1) % emailAccounts.length;
           saveProgress();
+          
+          updateStatus(`✅ Sent to: ${templateParams.email} (${totalSent}/${dataRows.length} sent)`);
         })
         .catch(err => {
-          document.getElementById('status').innerText =
-            `❌ Error sending to: ${templateParams.email} (Retrying next cycle)`;
+          updateStatus(`❌ Error sending to: ${templateParams.email} (Retrying next cycle)`, false, true);
         });
     }
 
+    // ====== SCHEDULE EMAILS ======
+    function startSending() {
+      if (dataRows.length === 0) return;
+      
+      isRunning = true;
+      isPaused = false;
+      toggleButtons();
+
+      // Calculate time since last send
+      const lastSendTime = localStorage.getItem('lastSendTime');
+      const timeSinceLastSend = lastSendTime ? Date.now() - parseInt(lastSendTime) : 10 * 60 * 1000;
+      const timeToNextSend = Math.max(0, (10 * 60 * 1000) - timeSinceLastSend);
+      
+      // Clear any existing interval
+      if (emailInterval) clearInterval(emailInterval);
+      
+      // Initial send (either immediately or after delay)
+      if (timeSinceLastSend >= 10 * 60 * 1000) {
+        sendNextEmail();
+      } else {
+        updateStatus(`⏳ Next email in ${Math.ceil(timeToNextSend/60000)} minutes...`);
+        setTimeout(sendNextEmail, timeToNextSend);
+      }
+      
+      // Start regular interval
+      emailInterval = setInterval(sendNextEmail, 10 * 60 * 1000);
+    }
+
+    // ====== CSV UPLOAD ======
     document.getElementById('csvFile').addEventListener('change', function (event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -125,29 +168,48 @@
         skipEmptyLines: true,
         complete: function (results) {
           dataRows = results.data;
+          rowIndex = 0;
+          accountIndex = 0;
+          totalSent = 0;
           saveProgress();
-          document.getElementById('status').innerText =
-            `✅ Loaded ${dataRows.length} records. Starting in 5 seconds...`;
-
-          setTimeout(() => {
-            if (emailInterval) clearInterval(emailInterval);
-            emailInterval = setInterval(sendNextEmail, 10 * 60 * 1000);
-            sendNextEmail();
-          }, 5000);
+          updateStatus(`✅ Loaded ${dataRows.length} records. Click Start to begin`);
+          toggleButtons(true);
+        },
+        error: function(err) {
+          updateStatus(`❌ Error parsing CSV file`, false, true);
         }
       });
     });
 
+    // ====== CONTROL BUTTONS ======
+    document.getElementById('startBtn').addEventListener('click', startSending);
+    
     document.getElementById('pauseBtn').addEventListener('click', () => {
       isPaused = true;
-      document.getElementById('status').innerText += ' (PAUSED)';
+      updateStatus("⏸ PAUSED - Click Resume to continue");
+      toggleButtons();
     });
 
     document.getElementById('resumeBtn').addEventListener('click', () => {
       isPaused = false;
-      document.getElementById('status').innerText = '▶ RESUMED - Next email will send soon...';
+      updateStatus("▶ RESUMED - Next email will send at scheduled time");
+      toggleButtons();
       sendNextEmail();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      clearInterval(emailInterval);
+      dataRows = [];
+      rowIndex = 0;
+      accountIndex = 0;
+      totalSent = 0;
+      isRunning = false;
+      isPaused = false;
+      localStorage.removeItem('emailSenderData');
+      document.getElementById('csvFile').value = '';
+      updateStatus("🔄 System reset. Upload a new CSV file to begin");
+      toggleButtons();
     });
   </script>
 </body>
-</html>
+  </html>
